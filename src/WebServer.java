@@ -11,8 +11,9 @@ public class WebServer {
 	private String root;
 	private String defaultPage;
 	private int maxThreads;
+	
 	private ThreadPool threadPool;
-
+	
 	/**
 	 * Read params from config file
 	 * 
@@ -26,7 +27,7 @@ public class WebServer {
 			String configFilePath = getClass().getProtectionDomain()
 					.getCodeSource().getLocation().getPath()
 					+ CONFIG_FILE;
-			ConfigFileReader.readConfogFile(configFilePath, this);
+			ConfigFile.readConfogFile(configFilePath, this);
 
 			// Init thread pool with max thread number
 			threadPool = new ThreadPool(maxThreads);
