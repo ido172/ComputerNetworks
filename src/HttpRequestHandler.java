@@ -59,11 +59,11 @@ final class HttpRequestHandler implements Runnable {
 			socket.setSoTimeout(CONNECTION_TIMEOUT);
 			outToClient = new DataOutputStream(socket.getOutputStream());
 
-			// keep getting request while in keep alive mode or until time out
+			// keep getting request while in keep alive mode or until time out.
 			do {
 				initRequestFlags();
 				
-				// Process the request and get the response
+				// Process the request and get the response.
 				HttpResponse httpResponse = processRequest();
 				
 				if (httpResponse != null) {
@@ -124,7 +124,7 @@ final class HttpRequestHandler implements Runnable {
 					System.out.println(builder.toString());
 				}
 
-				// write chunk of 0 length to indicate end
+				// Write chunk of 0 length to indicate end.
 				outToClient.writeBytes("0" + HttpResponse.CRLF);
 			} else {
 				outToClient.writeBytes(httpResponse.getBody());
@@ -135,25 +135,25 @@ final class HttpRequestHandler implements Runnable {
 	private HttpResponse processRequest() {
 		try {
 			
-			// Read client Input and parse it
+			// Read client Input and parse it.
 			BufferedReader inFromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			RequestParser requestParser = new RequestParser(this);
 			parsedHttpRequest= requestParser.getParsedRequest(inFromClient);
 			
-			// Check if connection was terminated by client
+			// Check if connection was terminated by client.
 			if (isTerminatedByClient) {
 				isKeepAlive = false;
 				return null;
 			}
 			
-			// Get request parameters and request as string
+			// Get request parameters and request as string.
 			httpRequestParams = requestParser.getParametersMap();
 			request = requestParser.getRequest();
 
 			// Print request to console
 			System.out.println(request);
 
-			// Validate if parse is ok
+			// Validate if parse is OK.
 			if (parsedHttpRequest == null) {
 				return httpResponseMaker.makeErrorPageResponse(
 						HttpResponse.RESPONSE_400_BAD_REQUEST, 

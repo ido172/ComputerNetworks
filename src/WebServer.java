@@ -15,7 +15,7 @@ public class WebServer {
 	private ThreadPool threadPool;
 	
 	/**
-	 * Read params from config file
+	 * Read parameters from configuration file.
 	 * 
 	 * @return true if read was successful or false otherwise
 	 */
@@ -23,13 +23,13 @@ public class WebServer {
 		boolean result = false;
 		try {
 			
-			// Get params from config file
+			// Get parameters from configuration file.
 			String configFilePath = getClass().getProtectionDomain()
 					.getCodeSource().getLocation().getPath()
 					+ CONFIG_FILE;
 			ConfigFile.readConfogFile(configFilePath, this);
 
-			// Init thread pool with max thread number
+			// Initialize thread pool with max thread number.
 			threadPool = new ThreadPool(maxThreads);
 
 			result = true;
@@ -48,7 +48,7 @@ public class WebServer {
 
 	public void runServer() {
 		
-		// If read config file is successful start server
+		// If read configuration file is successful start server.
 		if (readConfogFile()) {
 
 			// Establish the listen socket.
@@ -56,7 +56,7 @@ public class WebServer {
 
 			try {
 				
-				// Receive client connection
+				// Receive client connection.
 				socket = new ServerSocket(port);
 				System.out.println("The sever has started listening on port "+ port);
 
