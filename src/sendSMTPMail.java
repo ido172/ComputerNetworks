@@ -3,10 +3,11 @@ import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.BindException;
 import java.net.Socket;
-//import org.apache.commons.codec.binary.Base64;
+
+import javax.xml.bind.DatatypeConverter;
 
 public class sendSMTPMail {
-
+	static String CRLF = "\r\n";
 	static String AUTH_LOGIN = "AUTH LOGIN";
 	static String Client_Name = "ShayBozo IdoOrlov";
 	static String EHLO = "EHLO";
@@ -20,19 +21,23 @@ public class sendSMTPMail {
 	static String FROM = "FROM:";
 	static String Sender = "Sender:";
 	static String Current_Server = "mail.netvision.net.il";
+	static String OK_Code = "250";
+	static String DataOKCode = "235";
+	static String QUIT = "quit";
 
 	private String from;
 	private String subject;
 	private String data;
 	private String address;
-	private String sender;
+	private String senderName;
+	private BufferedReader inFromServer;
 
 	public sendSMTPMail(String from, String address, String subject, String sender, String data) {
 		this.from = from;
 		this.subject = subject;
 		this.data = data;
 		this.address = address;
-		this.sender = sender;
+		this.senderName = sender;
 
 		this.sendMail();
 	}
@@ -44,83 +49,111 @@ public class sendSMTPMail {
 
 		try {
 
-			// Create client socket.
-			clientSocket = new Socket(Current_Server, ConfigFile.SMTPPort);
-			// System.out.println("The sever has started listening on port " +
-			// ConfigFile.SMTPPort);
+			// Create client socket and check authentication.
+			clientSocket = new Socket(ConfigFile.SMTPName, ConfigFile.SMTPPort);
+			sentence = inFromServer.readLine();
+			if (!sentence.substring(0, 2).equals(OK_Code)) {
+				clientSocket.close();
+				return;
+			}
+
 			DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-			BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+			inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-			// Start the connection???
-
-			// HELO/EHLO and Auto login part.
+			// EHLO and Auto login part.
 			if (ConfigFile.SMTPIsAuthLogin == "TRUE") {
 
 				// EHLO part.
-				outToServer.writeBytes(EHLO + " " + Client_Name);
-				sentence = inFromServer.readLine();
-				// Check the input.
+				outToServer.writeBytes(EHLO + " " + Client_Name + CRLF);
+				sentence = inFromServer.readLine(); // / not good there is allot
+													// of lines.
+				if (!sentence.substring(0, 2).equals(OK_Code)) {
+					clientSocket.close();
+					return;
+				}
 
 				// AUTH LOGIN part.
 				outToServer.writeBytes(AUTH_LOGIN);
-				// Check the input.
+				if (!sentence.substring(0, 2).equals("334")) {
+					clientSocket.close();
+					return;
+				}
 
 				// SMTPName part.
-				outToServer.writeBytes(ConfigFile.SMTPName); // IN BASE64
-				// Check the input.
+				outToServer.writeBytes(DatatypeConverter.printBase64Binary(ConfigFile.SMTPUsername.getBytes()) + CRLF);
+				if (!sentence.substring(0, 2).equals("334")) {
+					clientSocket.close();
+					return;
+				}
 
 				// SMTPPassword part.
-				outToServer.writeBytes(ConfigFile.SMTPPassword); // IN BASE64
-				// Check the input.
+				outToServer.writeBytes(DatatypeConverter.printBase64Binary(ConfigFile.SMTPPassword.getBytes()) + CRLF);
+				if (!sentence.substring(0, 2).equals("334")) {
+					clientSocket.close();
+					return;
+				}
 
 			} else {
-				outToServer.writeBytes(HELO + " " + Client_Name);
+				// HELO
+				outToServer.writeBytes(HELO + " " + Client_Name + CRLF);
 				sentence = inFromServer.readLine();
-				if (!sentence.substring(0, 2).equals("250")) {
+				if (!sentence.substring(0, 2).equals(OK_Code)) {
 					return;
 				}
 			}
-			//
-			// //encoding byte array into base 64
-			// byte[] encoded = Base64.encodeBase64(orig.getBytes());
-			//
-			// System.out.println("Original String: " + orig );
-			// System.out.println("Base64 Encoded String : " + new
-			// String(encoded));
-			//
-			// //decoding byte array into base64
-			// byte[] decoded = Base64.decodeBase64(encoded);
-			// System.out.println("Base 64 Decoded  String : " + new
-			// String(decoded));
-			//
-			//
 
 			// MAIL FROM part.
-			outToServer.writeBytes(MAIL_FROM + " " + from);
+			outToServer.writeBytes(MAIL_FROM + " " + from + CRLF);
 			sentence = inFromServer.readLine();
-			if (!sentence.substring(0, 8).equals("250 2.5.0")) {
+			if (!sentence.substring(0, 2).equals(OK_Code)) {
 				return;
 			}
 
 			// RCTP TO part.
-			outToServer.writeBytes(RCTP_TO + " " + address);
+			outToServer.writeBytes(RCTP_TO + " " + address + CRLF);
 			sentence = inFromServer.readLine();
-
-			if (!sentence.substring(0, 8).equals("250 2.1.5")) {
+			if (!sentence.substring(0, 2).equals(OK_Code)) {
 				return;
 			}
 
 			// DATA part.
-			outToServer.writeBytes(DATA);
+			outToServer.writeBytes(DATA + CRLF);
 			sentence = inFromServer.readLine();
-			// Check the input.
+			if (!sentence.substring(0, 2).equals(DataOKCode)) {
+				return;
+			}
 
 			// Mail context part.
-			String MailContext = Subject + " " + subject + "\n" + FROM + " " + From_name + "\n" + Sender + " " + sender
-					+ "\n" + data + "\n" + Dot;
-			outToServer.writeBytes(MailContext);
+			StringBuilder MailContext = new StringBuilder();
+			MailContext.append(Subject);
+			MailContext.append(" ");
+			MailContext.append(subject);
+			MailContext.append(CRLF);
+			MailContext.append(FROM);
+			MailContext.append(" ");
+			MailContext.append(From_name);
+			MailContext.append(CRLF);
+			MailContext.append(Sender);
+			MailContext.append(" ");
+			MailContext.append(senderName);
+			MailContext.append(CRLF);
+			MailContext.append(data);
+			MailContext.append(CRLF);
+			MailContext.append(Dot);
+			MailContext.append(CRLF);
+
+			outToServer.writeBytes(MailContext.toString());
 			sentence = inFromServer.readLine();
-			// Check the input. ???
+			if (!sentence.substring(0, 2).equals(OK_Code)) {
+				return;
+			}
+
+			// Quit part.
+			outToServer.writeBytes(QUIT + CRLF);
+			// sentence = inFromServer.readLine();
+			// if (!sentence.substring(0, 2).equals("221")) {
+			// return;
+			// }
 
 			clientSocket.close();
 
@@ -132,5 +165,4 @@ public class sendSMTPMail {
 			e.printStackTrace();
 		}
 	}
-
 }
