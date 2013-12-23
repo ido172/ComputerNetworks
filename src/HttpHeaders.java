@@ -11,6 +11,8 @@ public class HttpHeaders {
 	public static final String HEADER_CHUNKED = "Chunked";
 	public static final String HEADER_TRANSFER_ENCODING = "Transfer-Encoding";
 	public static final String HEADER_ALLOW = "Allow";
+	public static final String HEADER_COOKIE = "Cookie";
+	public static final String HEADER_SET_COOKIE = "Set-Cookie:";
 	
 	/** header values constants **/
 	public static final String CONNECTION_CLOSE = "close";

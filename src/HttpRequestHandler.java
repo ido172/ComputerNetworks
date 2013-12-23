@@ -211,12 +211,7 @@ final class HttpRequestHandler implements Runnable {
 		String methodName = parsedHttpRequest.get(RequestParser.METHOD);
 		HttpResponse result = null;
 		
-		if (parsedHttpRequest.get(RequestParser.LOCATION).equals(FORM_PAGE)
-				&& (methodName.equals(HTTP_METHOD_POST) || methodName.equals(HTTP_METHOD_GET) || isHeadRequest)) {
-			result = httpResponseMaker.handleFORMRequest();
-		}
-		
-		else if (methodName.equals(HTTP_METHOD_GET) || isHeadRequest) {
+		if (methodName.equals(HTTP_METHOD_GET) || isHeadRequest) {
 			result = httpResponseMaker.handleGETRequest(root, defaultPage);
 		}
 		

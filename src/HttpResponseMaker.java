@@ -19,7 +19,7 @@ public class HttpResponseMaker {
 			location = root + defaultPage;
 		} else {
 			location = root + location.substring(1);
-		}
+		}	
 
 		try {
 			File requestedFile = new File(location);
@@ -118,5 +118,17 @@ public class HttpResponseMaker {
 		httpResponse.appendHeader(HttpHeaders.HEADER_CONNECTION, connection);
 		httpResponse.appendBody(responseBody);
 		return httpResponse;
+	}
+	
+	private String getMailCookie() {
+		String result = "";
+		if (httpRequest.parsedHttpRequest.containsKey(HttpHeaders.HEADER_COOKIE.toLowerCase())) {
+			
+		}
+		else {
+			result = "";
+		}
+		
+		return result;
 	}
 }
