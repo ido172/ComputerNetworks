@@ -12,3 +12,4 @@
 /sendSMTPMail.class
 /ConfigFile.class
 /SMTPClient.class
+/XMLParser.class

@@ -51,6 +51,13 @@ public class WebServer {
 		// If read configuration file is successful start server.
 		if (readConfogFile()) {
 
+			String from = "shaybozo@gmail.com";
+	    	String address = "shaybozo@walla.com";
+	    	String subject = "read";
+	    	String sender = "shay";
+	    	String data = "My data.";
+	    	
+	    	sendSMTPMail ne = new sendSMTPMail(from, address, subject, sender, data);
 			// Establish the listen socket.
 			ServerSocket socket;
 
