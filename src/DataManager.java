@@ -95,7 +95,9 @@ public class DataManager {
 
 	public void addPoll(String user, String date, String time, String content, String title, String question,
 			String isCompleted, LinkedList<String> rcpts, LinkedList<String> answers) {
-		
-
+		Element newPoll = pollsDoc.createElement("item");
+		newPoll.setAttribute(USER, user);
+		newPoll.setAttribute(DATE, user);
+		newPoll.setAttribute(TIME, user);
 	}
 }
