@@ -5,6 +5,7 @@ public class HttpResponse {
 	
 	public static final String CRLF = "\r\n";
 	public static final String RESPONSE_200_OK = "200 OK";
+	public static final String RESPONSE_302_REDIRECT = "302 Found";
 	public static final String RESPONSE_400_BAD_REQUEST = "400 Bad Request";
 	public static final String RESPONSE_404_NOT_FOUND = "404 Not Found";
 	public static final String RESPONSE_408_REQUEST_TIMEOUT = "408 Request Time out";
@@ -21,6 +22,7 @@ public class HttpResponse {
             										 "</HEAD><BODY><H1>"+PLCAEHOLDER_TITLE+"</H1>" +
             										 "<p>"+PLCAEHOLDER_BODY+"</P>" +
             										 "</BODY></HTML>";
+	
 
 	
 	private StringBuilder headResponse = null;
