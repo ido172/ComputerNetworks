@@ -26,6 +26,8 @@ public class HttpHeaders {
 	
 	public static final String CHUNKED_YES = "yes";
 	
+	public static final String COOKIE_VALUE= "usermail-";
+	
 	public static final String TRANSFER_ENCODING_CHUNKED = "chunked";
 	
 	
