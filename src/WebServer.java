@@ -11,9 +11,9 @@ public class WebServer {
 	private String root;
 	private String defaultPage;
 	private int maxThreads;
-	
+
 	private ThreadPool threadPool;
-	
+
 	/**
 	 * Read parameters from configuration file.
 	 * 
@@ -22,10 +22,9 @@ public class WebServer {
 	private boolean readConfogFile() {
 		boolean result = false;
 		try {
-			
+
 			// Get parameters from configuration file.
-			String configFilePath = getClass().getProtectionDomain()
-					.getCodeSource().getLocation().getPath()
+			String configFilePath = getClass().getProtectionDomain().getCodeSource().getLocation().getPath()
 					+ CONFIG_FILE;
 			ConfigFile.readConfogFile(configFilePath, this);
 
@@ -47,41 +46,41 @@ public class WebServer {
 	}
 
 	public void runServer() {
-		
+
 		// If read configuration file is successful start server.
 		if (readConfogFile()) {
 
 			String from = "shaybozo@gmail.com";
-	    	String address = "shaybozo@walla.com";
-	    	String subject = "read";
-	    	String sender = "shay";
-	    	String data = "My data.";
-	    	
-	    	sendSMTPMail ne = new sendSMTPMail(from, address, subject, sender, data);
+			String address = "shaybozo@walla.com";
+			String subject = "read";
+			String sender = "shay";
+			String data = "My data.";
+
+			SMTPMail.sendSMTPMail(from, address, subject, sender, data);
+
 			// Establish the listen socket.
 			ServerSocket socket;
 
 			try {
-				
+
 				// Receive client connection.
 				socket = new ServerSocket(port);
-				System.out.println("The sever has started listening on port "+ port);
+				System.out.println("The sever has started listening on port " + port);
 
 				// Process HTTP service requests in an infinite loop.
 				while (true) {
 
 					// Listen for a TCP connection request.
 					Socket connection = socket.accept();
-					
+
 					// Construct an object to process the HTTP request message.
-					HttpRequestHandler request = new HttpRequestHandler(connection,
-							threadPool, root, defaultPage);
+					HttpRequestHandler request = new HttpRequestHandler(connection, threadPool, root, defaultPage);
 
 					// Send HTTP request to thread poll for handling.
 					threadPool.handleNewHttpRequest(request);
 				}
 			} catch (BindException e) {
-				System.err.println("Seems Like port " + port +" is already in use by another program");
+				System.err.println("Seems Like port " + port + " is already in use by another program");
 				e.printStackTrace();
 			} catch (IOException e) {
 				System.err.println("Unable to establish server connection");

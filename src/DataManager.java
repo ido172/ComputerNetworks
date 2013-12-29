@@ -2,6 +2,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
@@ -59,19 +60,18 @@ public class DataManager {
 		}
 	}
 
-	public void addTask(String user, String date, String time, String content, String rcpt, String subject,
-			String isDone) {
+	public void addTask(Task task) {
 
 		Element newTask = tasksDoc.createElement("item");
-		newTask.setAttribute(USER, user);
-		newTask.setAttribute("rcpt", rcpt);
-		newTask.setAttribute("subject", subject);
-		newTask.setAttribute(DATE, user);
-		newTask.setAttribute(TIME, user);
-		newTask.setAttribute("isDone", isDone);
+		newTask.setAttribute(USER, task.getUser());
+		newTask.setAttribute("rcpt", task.getRcpt());
+		newTask.setAttribute("subject", task.getSubject());
+		newTask.setAttribute(DATE, task.getDate());
+		newTask.setAttribute(TIME, task.getTime());
+		newTask.setAttribute("isDone", task.getIsDone());
 
 		Element _content = tasksDoc.createElement(CONTENT);
-		_content.appendChild(tasksDoc.createTextNode(content));
+		_content.appendChild(tasksDoc.createTextNode(task.getContent()));
 		newTask.appendChild(_content);
 
 		Node taskes = tasksDoc.getFirstChild();
@@ -79,25 +79,154 @@ public class DataManager {
 
 	}
 
-	public void addRemainder(String user, String date, String time, String content) {
+	public void addReminder(Reminder reminder) {
 		Element newRemainder = reminderDoc.createElement("item");
-		newRemainder.setAttribute(USER, user);
-		newRemainder.setAttribute(DATE, user);
-		newRemainder.setAttribute(TIME, user);
+		newRemainder.setAttribute(USER, reminder.getUser());
+		newRemainder.setAttribute(DATE, reminder.getDate());
+		newRemainder.setAttribute(TIME, reminder.getTime());
 
 		Element _content = reminderDoc.createElement(CONTENT);
-		_content.appendChild(reminderDoc.createTextNode(content));
+		_content.appendChild(reminderDoc.createTextNode(reminder.getContent()));
 		newRemainder.appendChild(_content);
 
 		Node remainders = reminderDoc.getFirstChild();
 		remainders.appendChild(newRemainder);
 	}
 
-	public void addPoll(String user, String date, String time, String content, String title, String question,
-			String isCompleted, LinkedList<String> rcpts, LinkedList<String> answers) {
+	public void addPoll(Poll poll) {
 		Element newPoll = pollsDoc.createElement("item");
-		newPoll.setAttribute(USER, user);
-		newPoll.setAttribute(DATE, user);
-		newPoll.setAttribute(TIME, user);
+		newPoll.setAttribute(USER, poll.getUser());
+		newPoll.setAttribute(DATE, poll.getDate());
+		newPoll.setAttribute(TIME, poll.getTime());
+		newPoll.setAttribute("title", poll.getTitle());
+		newPoll.setAttribute("question", poll.getQuestion());
+		newPoll.setAttribute("isCompleted", poll.getIsCompleted());
+
+		// Rcpts part.
+		Element _rcpts = reminderDoc.createElement("rcpts");
+		Element _contact;
+
+		for (String rcpt : poll.getRcpts()) {
+			_contact = reminderDoc.createElement("contact");
+			_contact.setAttribute("hasReplyed", "true");
+			_contact.appendChild(reminderDoc.createTextNode(rcpt));
+
+			_rcpts.appendChild(_rcpts);
+		}
+
+		newPoll.appendChild(_rcpts);
+
+		// Answers part.
+		Element _answers = reminderDoc.createElement("answers");
+		Element _answer;
+
+		for (String answer : poll.getAnswers()) {
+			_answer = reminderDoc.createElement("contact");
+			_answer.appendChild(reminderDoc.createTextNode(answer));
+
+			_rcpts.appendChild(_answers);
+		}
+
+		newPoll.appendChild(_answers);
+
+		Node polls = pollsDoc.getFirstChild();
+		polls.appendChild(newPoll);
+	}
+
+	public LinkedList<Task> retrieveTasks() {
+		LinkedList<Task> taskList = new LinkedList<Task>();
+		NodeList items = tasksDoc.getElementsByTagName("item");
+
+		for (int i = 0; i < items.getLength(); i++) {
+			Task taskFromFile = createTaskFromItem(items.item(i));
+			taskList.add(taskFromFile);
+		}
+
+		return taskList;
+	}
+
+	private Task createTaskFromItem(Node item) {
+
+		NamedNodeMap att = item.getAttributes();
+
+		String user = att.getNamedItem("user").getNodeValue();
+		String date = att.getNamedItem("date").getNodeValue();
+		String time = att.getNamedItem("time").getNodeValue();
+		String content = item.getFirstChild().getNodeValue();
+		String rcpt = att.getNamedItem("rcpt").getNodeValue();
+		String subject = att.getNamedItem("subject").getNodeValue();
+		String isDone = att.getNamedItem("isDone").getNodeValue();
+
+		Task taskFromFile = new Task(user, date, time, content, rcpt, subject, isDone);
+
+		return taskFromFile;
+	}
+
+	public LinkedList<Reminder> retrieveReminders() {
+		NodeList items = reminderDoc.getElementsByTagName("item");
+		LinkedList<Reminder> reminderList = new LinkedList<Reminder>();
+
+		for (int i = 0; i < items.getLength(); i++) {
+			Reminder reminderFromFile = createReminderFromItem(items.item(i));
+			reminderList.add(reminderFromFile);
+		}
+
+		return reminderList;
+	}
+
+	private Reminder createReminderFromItem(Node item) {
+
+		NamedNodeMap att = item.getAttributes();
+
+		String user = att.getNamedItem("user").getNodeValue();
+		String date = att.getNamedItem("date").getNodeValue();
+		String time = att.getNamedItem("time").getNodeValue();
+		String content = item.getFirstChild().getNodeValue();
+		String title = att.getNamedItem("title").getNodeValue();
+
+		Reminder reminderFromFile = new Reminder(user, date, time, content, title);
+
+		return reminderFromFile;
+	}
+
+	public LinkedList<Poll> retrievePolls() {
+		NodeList items = pollsDoc.getElementsByTagName("item");
+		LinkedList<Poll> pollList = new LinkedList<Poll>();
+
+		for (int i = 0; i < items.getLength(); i++) {
+			Poll pollFromFile = createPollFromItem(items.item(i));
+			pollList.add(pollFromFile);
+		}
+
+		return pollList;
+	}
+
+	private Poll createPollFromItem(Node item) {
+		NamedNodeMap att = item.getAttributes();
+
+		String user = att.getNamedItem("user").getNodeValue();
+		String date = att.getNamedItem("date").getNodeValue();
+		String time = att.getNamedItem("time").getNodeValue();
+		String title = att.getNamedItem("title").getNodeValue();
+		String question = att.getNamedItem("question").getNodeValue();
+		String isCompleted = att.getNamedItem("isCompleted").getNodeValue();
+
+		Node contentXML = item.getFirstChild();
+		LinkedList<String> rcpts = new LinkedList<>();
+
+		// for (){
+		//
+		// }
+
+		Node answerstXML = item.getLastChild();
+		LinkedList<String> answers = new LinkedList<>();
+
+		// for (){
+		//
+		// }
+
+		Poll pollFromFile = new Poll(user, date, time, title, question, isCompleted, rcpts, answers);
+
+		return pollFromFile;
 	}
 }

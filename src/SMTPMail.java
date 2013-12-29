@@ -6,12 +6,13 @@ import java.net.Socket;
 
 import javax.xml.bind.DatatypeConverter;
 
-public class sendSMTPMail {
-	static String CRLF = "\r\n";
-	static String AUTH_LOGIN = "AUTH LOGIN";
-	static String Client_Name = "ShayBozo IdoOrlov";
-	static String EHLO = "EHLO";
-	static String HELO = "HELO";
+public  class SMTPMail {
+	
+	public static String CRLF = "\r\n";
+	public static String AUTH_LOGIN = "AUTH LOGIN";
+	public static String Client_Name = "ShayBozo IdoOrlov";
+	public static String EHLO = "EHLO";
+	public static String HELO = "HELO";
 	static String From_name = "Mr. Tasker";
 	static String Dot = ".";
 	static String MAIL_FROM = "MAIL FROM:";
@@ -26,33 +27,18 @@ public class sendSMTPMail {
 	static String DataOKCode = "354";
 	static String QUIT = "quit";
 
-	private String from;
-	private String subject;
-	private String data;
-	private String address;
-	private String senderName;
-	private BufferedReader inFromServer;
 
-	public sendSMTPMail(String from, String address, String subject, String sender, String data) {
-		this.from = from;
-		this.subject = subject;
-		this.data = data;
-		this.address = address;
-		this.senderName = sender;
-
-		this.sendMail();
-	}
-
-	private void sendMail() {
-		// Establish the listen socket.
+	public static void sendSMTPMail(String from, String address, String subject, String sender, String data) {
+	
 		Socket clientSocket = null;
-		String sentence = "";
+		
 
 		try {
-
+			String sentence = "";
+			
 			// Create client socket and check authentication.
 			clientSocket = new Socket(ConfigFile.SMTPName, ConfigFile.SMTPPort);
-			inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+			BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
 
 			System.out.println(sentence = inFromServer.readLine());
@@ -113,7 +99,8 @@ public class sendSMTPMail {
 
 			// MAIL FROM part.
 			outToServer.writeBytes(MAIL_FROM + " " + from + CRLF);
-			System.out.println(sentence = inFromServer.readLine());
+			sentence = inFromServer.readLine();
+			System.out.println(sentence);
 //			sentence = inFromServer.readLine();
 //			if (!sentence.substring(0, 2).equals(OK_Code)) {
 //				return;
@@ -147,7 +134,7 @@ public class sendSMTPMail {
 			MailContext.append(CRLF);
 			MailContext.append(Sender);
 			MailContext.append(" ");
-			MailContext.append(senderName);
+			MailContext.append(sender);
 			MailContext.append(CRLF);
 			MailContext.append(data);
 			MailContext.append(CRLF);
