@@ -1,17 +1,14 @@
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
-
-import java.awt.List;
 import java.io.File;
 import java.util.LinkedList;
 
-public class DataManager {
+public class DataXMLManager {
 
 	public static String USER = "user";
 	public static String DATE = "date";
@@ -27,7 +24,7 @@ public class DataManager {
 	private File pollsDataBase;
 	private Document pollsDoc;
 
-	public DataManager() {
+	public DataXMLManager() {
 
 		try {
 			// Create the files if they do not exists.
@@ -108,7 +105,7 @@ public class DataManager {
 
 		for (String rcpt : poll.getRcpts()) {
 			_contact = reminderDoc.createElement("contact");
-			_contact.setAttribute("hasReplyed", "true");
+			_contact.setAttribute("hasReplyed", "true"); // There is a problem here with the attribute hasReplyed.
 			_contact.appendChild(reminderDoc.createTextNode(rcpt));
 
 			_rcpts.appendChild(_rcpts);
@@ -211,7 +208,8 @@ public class DataManager {
 		String question = att.getNamedItem("question").getNodeValue();
 		String isCompleted = att.getNamedItem("isCompleted").getNodeValue();
 
-		Node contentXML = item.getFirstChild();
+		Node rcptsXML = item.getFirstChild();
+		// rcptsXML.
 		LinkedList<String> rcpts = new LinkedList<>();
 
 		// for (){
