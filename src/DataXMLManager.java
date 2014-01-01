@@ -1,11 +1,14 @@
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
+
 import java.io.File;
+import java.util.Date;
 import java.util.LinkedList;
 
 public class DataXMLManager {
@@ -93,7 +96,7 @@ public class DataXMLManager {
 	public void addPoll(Poll poll) {
 		Element newPoll = pollsDoc.createElement("item");
 		newPoll.setAttribute(USER, poll.getUser());
-		newPoll.setAttribute(DATE, poll.getDate());
+		newPoll.setAttribute(DATE, poll.getDate().toString());
 		newPoll.setAttribute(TIME, poll.getTime());
 		newPoll.setAttribute("title", poll.getTitle());
 		newPoll.setAttribute("question", poll.getQuestion());
@@ -223,7 +226,7 @@ public class DataXMLManager {
 		//
 		// }
 
-		Poll pollFromFile = new Poll(user, date, time, title, question, isCompleted, rcpts, answers);
+		Poll pollFromFile = new Poll(user, (Date)date, time, title, question, isCompleted, rcpts, answers);
 
 		return pollFromFile;
 	}
