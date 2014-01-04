@@ -26,7 +26,7 @@ public class HTMLCreator {
 			content.append("<td>" + getDateInRightformat(reminder.getDateOfCreation()) + "</td>");
 			content.append("<td>" +	getDateInRightformat(reminder.getDateOfReminding()) + "</td>");
 			content.append("<td><a data-role='button' href='reminder_editor.html?" + builderReminderIdParams(reminder) + "'>Edit</a></td>");
-			content.append("<td><form action='submit_reminder.html' method='POST'><input type='submit' value='delete' /><input type='hidden' name='"+DELETE_KEY+"'/></form></td>");
+			content.append("<td><form action='submit_reminder.html' data-ajax='false' method='POST'><input type='submit' value='delete' /><input type='hidden' name='delete'/></form></td>");
 			content.append("</tr>");
 		}
 		

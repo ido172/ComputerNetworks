@@ -51,7 +51,7 @@ public class HttpResponseMaker {
 			if (handler.isEditRequest()) {
 				handler.editReminderInDateBase(user);
 			} else if (handler.isDeleteRequest()) {
-					handler.deleteReminderInDateBase(user);
+				handler.deleteReminderInDateBase(user);
 			} else {
 				handler.createReminderInDataBase(user);
 			}
