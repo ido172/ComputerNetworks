@@ -28,7 +28,7 @@ public  class SMTPMail {
 	static String QUIT = "quit";
 
 
-	public static void sendSMTPMail(String from, String address, String subject, String sender, String data) {
+	public static void sendSMTPMail(String fromAddress, String sendToAddress, String subject, String sender, String data) {
 	
 		Socket clientSocket = null;
 		
@@ -98,7 +98,7 @@ public  class SMTPMail {
 			}
 
 			// MAIL FROM part.
-			outToServer.writeBytes(MAIL_FROM + " " + from + CRLF);
+			outToServer.writeBytes(MAIL_FROM + " " + fromAddress + CRLF);
 			sentence = inFromServer.readLine();
 			System.out.println(sentence);
 //			sentence = inFromServer.readLine();
@@ -107,7 +107,7 @@ public  class SMTPMail {
 //			}
 
 			// RCTP TO part.
-			outToServer.writeBytes(RCPT_TO + " " + address + CRLF);
+			outToServer.writeBytes(RCPT_TO + " " + sendToAddress + CRLF);
 			System.out.println(sentence = inFromServer.readLine());
 //			sentence = inFromServer.readLine();
 //			if (!sentence.substring(0, 2).equals(OK_Code)) {

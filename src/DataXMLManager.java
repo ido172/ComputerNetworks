@@ -8,16 +8,27 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 
 public class DataXMLManager {
-
+	public static String TIME_FORMAT = "";
 	public static String USER = "user";
 	public static String DATE = "date";
+	public static String DateOfCreation = "dateOfCreation";
+	public static String DateOfReminding = "dateOfReminding";
+	public static String HadBeenSend = "hadBeenSend";
 	public static String TIME = "time";
 	public static String CONTENT = "content";
-
+	public static String ISCOMPLETED = "isCompleted";
+	public static String RCPT = "rcpt";
+	public static String ITEM = "item";
+	public static String SUBJECT = "subject";
+	public static String TITLE = "title";
+	public static String DUEDATE = "dueDate";
+	public static String STATUS = "status";
 	private File tasksDataBase;
 	private Document tasksDoc;
 
@@ -62,13 +73,17 @@ public class DataXMLManager {
 
 	public void addTask(Task task) {
 
-		Element newTask = tasksDoc.createElement("item");
-		newTask.setAttribute(USER, task.getUser());
-		newTask.setAttribute("rcpt", task.getRcpt());
-		newTask.setAttribute("subject", task.getSubject());
-		newTask.setAttribute(DATE, task.getDate());
-		newTask.setAttribute(TIME, task.getTime());
-		newTask.setAttribute("isDone", task.getIsDone());
+		Element newTask = tasksDoc.createElement(ITEM);
+		newTask.setAttribute(USER, task.getTaskCreator());
+		newTask.setAttribute(TITLE, task.getTitle());
+		newTask.setAttribute(DateOfCreation, task.getDateOfCreation().toString());
+		newTask.setAttribute(DUEDATE, task.getDueDate().toString());
+		newTask.setAttribute(STATUS, task.getStatus());
+		newTask.setAttribute(RCPT, task.getRcpt());
+		String isCompleted = task.isCompleted() ? "true" : "false";
+		newTask.setAttribute(ISCOMPLETED, isCompleted);
+		String taskExpiredHadBeenNotify = task.isTaskExpiredHadBeenNotify() ? "true" : "false";
+		newTask.setAttribute("taskExpiredHadBeenNotify", taskExpiredHadBeenNotify);
 
 		Element _content = tasksDoc.createElement(CONTENT);
 		_content.appendChild(tasksDoc.createTextNode(task.getContent()));
@@ -80,10 +95,13 @@ public class DataXMLManager {
 	}
 
 	public void addReminder(Reminder reminder) {
-		Element newRemainder = reminderDoc.createElement("item");
+
+		Element newRemainder = reminderDoc.createElement(ITEM);
 		newRemainder.setAttribute(USER, reminder.getUser());
-		newRemainder.setAttribute(DATE, reminder.getDate());
-		newRemainder.setAttribute(TIME, reminder.getTime());
+		newRemainder.setAttribute(DateOfCreation, reminder.getDateOfCreation().toString());
+		newRemainder.setAttribute(DateOfReminding, reminder.getDateOfReminding().toString());
+		String hadBeenSend = reminder.isHadBeenSend() ? "true" : "false";
+		newRemainder.setAttribute(HadBeenSend, hadBeenSend);
 
 		Element _content = reminderDoc.createElement(CONTENT);
 		_content.appendChild(reminderDoc.createTextNode(reminder.getContent()));
@@ -94,13 +112,12 @@ public class DataXMLManager {
 	}
 
 	public void addPoll(Poll poll) {
-		Element newPoll = pollsDoc.createElement("item");
+		Element newPoll = pollsDoc.createElement(ITEM);
 		newPoll.setAttribute(USER, poll.getUser());
 		newPoll.setAttribute(DATE, poll.getDate().toString());
 		newPoll.setAttribute(TIME, poll.getTime());
-		newPoll.setAttribute("title", poll.getTitle());
 		newPoll.setAttribute("question", poll.getQuestion());
-		newPoll.setAttribute("isCompleted", poll.getIsCompleted());
+		newPoll.setAttribute(ISCOMPLETED, poll.getIsCompleted());
 
 		// Rcpts part.
 		Element _rcpts = reminderDoc.createElement("rcpts");
@@ -147,23 +164,38 @@ public class DataXMLManager {
 
 	private Task createTaskFromItem(Node item) {
 
+		SimpleDateFormat formatter = new SimpleDateFormat(TIME_FORMAT);
+		Date dateOfCreation = null;
+		Date dueDate = null;
 		NamedNodeMap att = item.getAttributes();
 
-		String user = att.getNamedItem("user").getNodeValue();
-		String date = att.getNamedItem("date").getNodeValue();
-		String time = att.getNamedItem("time").getNodeValue();
-		String content = item.getFirstChild().getNodeValue();
-		String rcpt = att.getNamedItem("rcpt").getNodeValue();
-		String subject = att.getNamedItem("subject").getNodeValue();
-		String isDone = att.getNamedItem("isDone").getNodeValue();
+		String taskCreator = att.getNamedItem(USER).getNodeValue();
+		String title = att.getNamedItem(TITLE).getNodeValue();
 
-		Task taskFromFile = new Task(user, date, time, content, rcpt, subject, isDone);
+		String dateOfCreationInString = att.getNamedItem(DateOfCreation).getNodeValue();
+		String dueDateInString = att.getNamedItem(DUEDATE).getNodeValue();
+		try {
+			dateOfCreation = formatter.parse(dateOfCreationInString);
+			dueDate = formatter.parse(dueDateInString);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+
+		String status = att.getNamedItem(STATUS).getNodeValue();
+		String content = item.getFirstChild().getNodeValue();
+		String rcpt = att.getNamedItem(RCPT).getNodeValue();
+		boolean isCompleted = (att.getNamedItem(ISCOMPLETED).getNodeValue().equals("true")) ? true : false;
+		boolean taskExpiredHadBeenNotify = (att.getNamedItem("taskExpiredHadBeenNotify").getNodeValue().equals("true")) ? true
+				: false;
+
+		Task taskFromFile = new Task(taskCreator, title, dateOfCreation, dueDate, status, content, rcpt, isCompleted,
+				taskExpiredHadBeenNotify);
 
 		return taskFromFile;
 	}
 
 	public LinkedList<Reminder> retrieveReminders() {
-		NodeList items = reminderDoc.getElementsByTagName("item");
+		NodeList items = reminderDoc.getElementsByTagName(ITEM);
 		LinkedList<Reminder> reminderList = new LinkedList<Reminder>();
 
 		for (int i = 0; i < items.getLength(); i++) {
@@ -176,21 +208,32 @@ public class DataXMLManager {
 
 	private Reminder createReminderFromItem(Node item) {
 
+		SimpleDateFormat formatter = new SimpleDateFormat(TIME_FORMAT);
+		Date dateOfCreation = null;
+		Date dateOfReminding = null;
 		NamedNodeMap att = item.getAttributes();
 
-		String user = att.getNamedItem("user").getNodeValue();
-		String date = att.getNamedItem("date").getNodeValue();
-		String time = att.getNamedItem("time").getNodeValue();
-		String content = item.getFirstChild().getNodeValue();
-		String title = att.getNamedItem("title").getNodeValue();
+		String user = att.getNamedItem(USER).getNodeValue();
+		String title = att.getNamedItem(TITLE).getNodeValue();
+		String dateOfCreationInString = att.getNamedItem(DateOfCreation).getNodeValue();
+		String dateOfRemindingInString = att.getNamedItem(DateOfReminding).getNodeValue();
+		try {
+			dateOfCreation = formatter.parse(dateOfCreationInString);
+			dateOfReminding = formatter.parse(dateOfRemindingInString);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 
-		Reminder reminderFromFile = new Reminder(user, date, time, content, title);
+		String content = item.getFirstChild().getNodeValue();
+		boolean hadBeenSend = (att.getNamedItem(HadBeenSend).getNodeValue().equals("true")) ? true : false;
+
+		Reminder reminderFromFile = new Reminder(user, title, dateOfCreation, dateOfReminding, content, hadBeenSend);
 
 		return reminderFromFile;
 	}
 
 	public LinkedList<Poll> retrievePolls() {
-		NodeList items = pollsDoc.getElementsByTagName("item");
+		NodeList items = pollsDoc.getElementsByTagName(ITEM);
 		LinkedList<Poll> pollList = new LinkedList<Poll>();
 
 		for (int i = 0; i < items.getLength(); i++) {
@@ -226,7 +269,7 @@ public class DataXMLManager {
 		//
 		// }
 
-		Poll pollFromFile = new Poll(user, (Date)date, time, title, question, isCompleted, rcpts, answers);
+		Poll pollFromFile = new Poll(user, (Date) date, time, title, question, isCompleted, rcpts, answers);
 
 		return pollFromFile;
 	}
