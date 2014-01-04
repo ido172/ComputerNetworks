@@ -5,6 +5,8 @@ import java.util.LinkedList;
 
 public class HTMLCreator {
 
+	private static String DELETE_KEY = "delete";
+	private static String EDIT_KEY = "edit";
 	private static String DATA_PLACEHOLDER = "[DATA_PLACEHOLDER]";
 	private SimpleDateFormat dateFormat;
 	private SimpleDateFormat justDateFormat;
@@ -23,8 +25,8 @@ public class HTMLCreator {
 			content.append("<td>"+reminder.getTitle()+"</td>");
 			content.append("<td>" + getDateInRightformat(reminder.getDateOfCreation()) + "</td>");
 			content.append("<td>" +	getDateInRightformat(reminder.getDateOfReminding()) + "</td>");
-			content.append("<td><a href='reminder_editor?" + builderReminderIdParams(reminder) + "'>Edit</a></td>");
-			content.append("<td>+reminder.getTitle()</td>");
+			content.append("<td><a href='reminder_editor.html?" + builderReminderIdParams(reminder) + "'>Edit</a></td>");
+			content.append("<td><form action='submit_reminder.html' method='POST'><input type='submit' value='delete' /><input type='hidden' name='"+DELETE_KEY+"'/></form></td>");
 			content.append("<tr>");
 		}
 		

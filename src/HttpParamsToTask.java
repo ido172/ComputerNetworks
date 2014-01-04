@@ -41,6 +41,7 @@ public class HttpParamsToTask {
 	public void editReminderInDateBase(String user) {
 		Reminder newReminder = createReminder(user);
 		Reminder oldReminder = createOriginalReminder(user);
+		dataBase.editReminder(newReminder, oldReminder);
 	}
 
 	private Reminder createReminder(String user) {
@@ -74,6 +75,14 @@ public class HttpParamsToTask {
 	}
 	
 	public boolean isEditRequest() {
-		return params.containsKey("is_edit");
+		return params.containsKey("edit") && params.get("edit").equals("true");
+	}
+
+	public boolean isDeleteRequest() {
+		return params.containsKey("delete");
+	}
+
+	public void deleteReminderInDateBase(String user) {
+		dataBase.deleteReminder(createReminder(user));
 	}
 }

@@ -50,6 +50,8 @@ public class HttpResponseMaker {
 			String user = getMailCookie();
 			if (handler.isEditRequest()) {
 				handler.editReminderInDateBase(user);
+			} else if (handler.isDeleteRequest()) {
+					handler.deleteReminderInDateBase(user);
 			} else {
 				handler.createReminderInDataBase(user);
 			}
