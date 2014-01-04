@@ -3,52 +3,68 @@ import java.util.LinkedList;
 
 public class Poll {
 
-	private String user;
-	private Date date;
-	private String question;
-	private String isCompleted;
-	private LinkedList<PollParticipant> rcpts;
+	private String pollCreator;
+	private String title;
+	private Date dateOfCreation;
+	private String subject;
+	private String question; // Content
 	private LinkedList<String> answers;
+	private LinkedList<PollParticipant> rcpts;
+	private boolean isCompleted;
 
-	public Poll(String user, Date date, String time, String question, String isCompleted,
-			LinkedList<PollParticipant> rcpts, LinkedList<String> answers) {
-		this.user = user;
-		this.date = date;
+	public Poll(String pollCreator, String title, Date dateOfCreation, String subject, String question,
+			LinkedList<String> answers, LinkedList<PollParticipant> rcpts, boolean isCompleted) {
+		this.pollCreator = pollCreator;
+		this.title = title;
+		this.dateOfCreation = dateOfCreation;
+		this.subject = subject;
 		this.question = question;
-		this.isCompleted = isCompleted;
-		this.rcpts = rcpts;
 		this.answers = answers;
+		this.rcpts = rcpts;
+		this.isCompleted = isCompleted;
 	}
 
 	public void handleNewPoll() {
 		for (PollParticipant rcpt : rcpts) {
 			StringBuilder data = new StringBuilder();
 			data.append(question + SMTPMail.CRLF);
-			data.append("<a href=\"polls_review.html?user=" + user + "&date=" + date.toString() + "&question="
-					+ question + "\">Link to poll</a>");
+			data.append("<a href=\"polls_reply.html?user=" + pollCreator + "&date=" + dateOfCreation.toString()
+					+ "&question=" + question + "\">Link to poll</a>");
 
-			SMTPMail.sendSMTPMail(user, rcpt.getUserName(), "Poll", user, data.toString());
+			SMTPMail.sendSMTPMail(pollCreator, rcpt.getUserName(), "Poll" + subject, pollCreator, data.toString());
 		}
 	}
-	
-	public void pollParticipantHadAnswer() {
-		
+
+	public String getPollCreator() {
+		return pollCreator;
 	}
 
-	public String getUser() {
-		return user;
+	public void setPollCreator(String pollCreator) {
+		this.pollCreator = pollCreator;
 	}
 
-	public void setUser(String user) {
-		this.user = user;
+	public String getTitle() {
+		return title;
 	}
 
-	public Date getDate() {
-		return date;
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
-	public void setDate(Date date) {
-		this.date = date;
+	public Date getDateOfCreation() {
+		return dateOfCreation;
+	}
+
+	public void setDateOfCreation(Date dateOfCreation) {
+		this.dateOfCreation = dateOfCreation;
+	}
+
+	public String getSubject() {
+		return subject;
+	}
+
+	public void setSubject(String subject) {
+		this.subject = subject;
 	}
 
 	public String getQuestion() {
@@ -59,12 +75,12 @@ public class Poll {
 		this.question = question;
 	}
 
-	public String getIsCompleted() {
-		return isCompleted;
+	public LinkedList<String> getAnswers() {
+		return answers;
 	}
 
-	public void setIsCompleted(String isCompleted) {
-		this.isCompleted = isCompleted;
+	public void setAnswers(LinkedList<String> answers) {
+		this.answers = answers;
 	}
 
 	public LinkedList<PollParticipant> getRcpts() {
@@ -75,11 +91,12 @@ public class Poll {
 		this.rcpts = rcpts;
 	}
 
-	public LinkedList<String> getAnswers() {
-		return answers;
+	public boolean isCompleted() {
+		return isCompleted;
 	}
 
-	public void setAnswers(LinkedList<String> answers) {
-		this.answers = answers;
+	public void setCompleted(boolean isCompleted) {
+		this.isCompleted = isCompleted;
 	}
+
 }

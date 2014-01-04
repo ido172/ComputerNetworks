@@ -24,7 +24,7 @@ public class HttpResponseMaker {
 		} else if (location.length() == 1 || location.equals("/index.html")) { // has cookie
 			location = root + "main.html";
 			response = HttpResponse.RESPONSE_302_REDIRECT;
-		}  else if (mailInCookie == null) {
+		} else if (mailInCookie == null) {
 			location = root + defaultPage;
 			response = HttpResponse.RESPONSE_302_REDIRECT;
 		} else {
@@ -38,13 +38,13 @@ public class HttpResponseMaker {
 			String contentType = FileTypeToContentType.convert(fileName);
 			String responseBody = FileToString.readFile(requestedFile);
 			switch (fileName.toLowerCase()) {
-				case "remainders.html":
-					responseBody = HTMLCreator.createRemainderPage(getMailCookie(), responseBody);
-					break;
-				case "tasks.html":
-					break;
-				case "polls.html":
-					break;
+			case "remainders.html":
+				responseBody = HTMLCreator.createRemainderPage(getMailCookie(), responseBody);
+				break;
+			case "tasks.html":
+				break;
+			case "polls.html":
+				break;
 			}
 			return makeHttpResponse(response, responseBody, contentType, null);
 
@@ -54,15 +54,15 @@ public class HttpResponseMaker {
 			return makeErrorPageResponse(HttpResponse.RESPONSE_404_NOT_FOUND, "The file you requested is not found");
 		}
 	}
-	
-	
+
 	public HttpResponse handlePOSTRequest(String root, String defaultPage) throws IOException {
 
 		String location = httpRequest.parsedHttpRequest.get(RequestParser.LOCATION);
-		
+
 		String response = HttpResponse.RESPONSE_200_OK;
 		String userName = null;
-		if (location.equals("/main.html") &&  httpRequest.httpRequestParams.containsKey("login")) { // location is "/" no cookie
+		if (location.equals("/main.html") && httpRequest.httpRequestParams.containsKey("login")) { // location is "/" no
+																									// cookie
 			location = root + location.substring(1);
 			response = HttpResponse.RESPONSE_200_OK;
 			userName = httpRequest.httpRequestParams.get("login");
@@ -118,7 +118,8 @@ public class HttpResponseMaker {
 
 	public HttpResponse makeOptionsResponse() {
 		httpRequest.isHeadRequest = true;
-		HttpResponse httpResponse = makeHttpResponse(HttpResponse.RESPONSE_200_OK, "", HttpHeaders.CONTENT_TYPE_MESSAGE, null);
+		HttpResponse httpResponse = makeHttpResponse(HttpResponse.RESPONSE_200_OK, "",
+				HttpHeaders.CONTENT_TYPE_MESSAGE, null);
 		StringBuilder sb = new StringBuilder();
 		int len = HttpRequestHandler.ALLOWED_METHODS.length;
 		for (int i = 0; i < len; i++) {
@@ -140,7 +141,7 @@ public class HttpResponseMaker {
 		responseBody = responseBody.replace(HttpResponse.PLCAEHOLDER_BODY, bodyText);
 		return makeHttpResponse(responseType, responseBody, HttpHeaders.CONTENT_TYPE_HTML, null);
 	}
-	
+
 	public HttpResponse makeHttpResponse(String responseType, String responseBody, String contentType, String cookie) {
 		String protocol = "";
 		String connection = "";

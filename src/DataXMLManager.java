@@ -29,6 +29,9 @@ public class DataXMLManager {
 	public static String TITLE = "title";
 	public static String DUEDATE = "dueDate";
 	public static String STATUS = "status";
+	public static String HADREPLYED = "hadReplyed";
+	public static String ANSWER = "answer";
+
 	private File tasksDataBase;
 	private Document tasksDoc;
 
@@ -112,38 +115,42 @@ public class DataXMLManager {
 	}
 
 	public void addPoll(Poll poll) {
+
+		Element _rcpts = pollsDoc.createElement("rcpts");
+		Element _answers = pollsDoc.createElement("answers");
+
 		Element newPoll = pollsDoc.createElement(ITEM);
-		newPoll.setAttribute(USER, poll.getUser());
-		newPoll.setAttribute(DATE, poll.getDate().toString());
+		newPoll.setAttribute(USER, poll.getPollCreator());
+		newPoll.setAttribute(TITLE, poll.getTitle());
+		newPoll.setAttribute(DATE, poll.getDateOfCreation().toString());
+		newPoll.setAttribute(SUBJECT, poll.getSubject());
 		newPoll.setAttribute("question", poll.getQuestion());
-		newPoll.setAttribute(ISCOMPLETED, poll.getIsCompleted());
-
-		// Rcpts part.
-		Element _rcpts = reminderDoc.createElement("rcpts");
-		Element _contact;
-
-		for (PollParticipant rcpt : poll.getRcpts()) {
-			_contact = reminderDoc.createElement("contact");
-			_contact.setAttribute("hasReplyed", "true"); // There is a problem here with the attribute hasReplyed.
-			//_contact.appendChild(reminderDoc.createTextNode(rcpt));
-
-			_rcpts.appendChild(_rcpts);
-		}
-
-		newPoll.appendChild(_rcpts);
+		newPoll.setAttribute(ISCOMPLETED, Boolean.toString(poll.isCompleted()));
 
 		// Answers part.
-		Element _answers = reminderDoc.createElement("answers");
+
 		Element _answer;
 
 		for (String answer : poll.getAnswers()) {
-			_answer = reminderDoc.createElement("contact");
-			_answer.appendChild(reminderDoc.createTextNode(answer));
+			_answer = pollsDoc.createElement(ANSWER);
+			_answer.appendChild(pollsDoc.createTextNode(answer));
 
-			_rcpts.appendChild(_answers);
+			_answers.appendChild(_answers);
 		}
 
 		newPoll.appendChild(_answers);
+
+		// Recipients part.
+		Element _rcpt;
+
+		for (PollParticipant rcpt : poll.getRcpts()) {
+			_rcpt = pollsDoc.createElement(RCPT);
+			_rcpt.setAttribute(HADREPLYED, Boolean.toString(rcpt.isHadAnswer()));
+			_rcpt.appendChild(pollsDoc.createTextNode(rcpt.getUserName()));
+			_rcpts.appendChild(_rcpt);
+		}
+
+		newPoll.appendChild(_rcpts);
 
 		Node polls = pollsDoc.getFirstChild();
 		polls.appendChild(newPoll);
@@ -151,7 +158,7 @@ public class DataXMLManager {
 
 	public LinkedList<Task> retrieveTasks() {
 		LinkedList<Task> taskList = new LinkedList<Task>();
-		NodeList items = tasksDoc.getElementsByTagName("item");
+		NodeList items = tasksDoc.getElementsByTagName(ITEM);
 
 		for (int i = 0; i < items.getLength(); i++) {
 			Task taskFromFile = createTaskFromItem(items.item(i));
@@ -244,31 +251,38 @@ public class DataXMLManager {
 	}
 
 	private Poll createPollFromItem(Node item) {
+		// Poll(String pollCreator, String title, Date dateOfCreation, String subject, String question,
+		// LinkedList<String> answers, LinkedList<PollParticipant> rcpts, boolean isCompleted)
 		NamedNodeMap att = item.getAttributes();
 
-		String user = att.getNamedItem("user").getNodeValue();
-		String date = att.getNamedItem("date").getNodeValue();
-		String time = att.getNamedItem("time").getNodeValue();
-		String title = att.getNamedItem("title").getNodeValue();
+		String user = att.getNamedItem(USER).getNodeValue();
+		String title = att.getNamedItem(TITLE).getNodeValue();
+		String date = att.getNamedItem(DATE).getNodeValue();
+		String subject = att.getNamedItem(SUBJECT).getNodeValue();
 		String question = att.getNamedItem("question").getNodeValue();
-		String isCompleted = att.getNamedItem("isCompleted").getNodeValue();
+		String isCompleted = att.getNamedItem(ISCOMPLETED).getNodeValue();
 
-		Node rcptsXML = item.getFirstChild();
-		// rcptsXML.
-		LinkedList<String> rcpts = new LinkedList<>();
+		// Adds the answers
+		NodeList answerstXML = item.getFirstChild().getChildNodes();
+		LinkedList<String> answers = new LinkedList<String>();
 
-		// for (){
-		//
-		// }
+		for (int i = 0; i < answerstXML.getLength(); i++) {
+			answers.add(answerstXML.item(i).getNodeValue());
+		}
 
-		Node answerstXML = item.getLastChild();
-		LinkedList<String> answers = new LinkedList<>();
+		// Add the recpts.
+		NodeList rcptsXML = item.getLastChild().getChildNodes();
+		LinkedList<PollParticipant> rcpts = new LinkedList<PollParticipant>();
+		PollParticipant pollParticipan = null;
 
-		// for (){
-		//
-		// }
+		for (int i = 0; i < rcptsXML.getLength(); i++) {
+			rcptsXML.item(i).getAttributes().getNamedItem(HADREPLYED);
+			// pollParticipan = new();
+			rcpts.add(pollParticipan);
 
-		Poll pollFromFile = null;//new Poll(user, (Date) date, time, title, question, isCompleted, rcpts, answers);
+		}
+
+		Poll pollFromFile = null;// new Poll(user, (Date) date, time, title, question, isCompleted, rcpts, answers);
 
 		return pollFromFile;
 	}

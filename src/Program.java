@@ -9,6 +9,5 @@ public class Program {
 
 		Date date = new Date();
 		System.out.println(date.toString());
-		System.out.println(date.getHours());
 	}
 }

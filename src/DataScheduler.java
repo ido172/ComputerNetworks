@@ -82,7 +82,7 @@ public class DataScheduler {
 		LinkedList<Poll> pollUserList = new LinkedList<Poll>();
 
 		for (Poll poll : pollList) {
-			if (poll.getUser().equals(user)) {
+			if (poll.getPollCreator().equals(user)) {
 				pollUserList.add(poll);
 			}
 		}
