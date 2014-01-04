@@ -75,60 +75,95 @@ public class DataXMLManager {
 	}
 
 	public void addTask(Task task) {
+		synchronized (tasksDoc) {
+			Node newTaskElement = convertTaskToNode(task);
+			tasksDoc.getFirstChild().appendChild(newTaskElement);
+		}
+	}
 
-		Element newTask = tasksDoc.createElement(ITEM);
-		newTask.setAttribute(USER, task.getTaskCreator());
-		newTask.setAttribute(TITLE, task.getTitle());
-		newTask.setAttribute(DateOfCreation, task.getDateOfCreation().toString());
-		newTask.setAttribute(DUEDATE, task.getDueDate().toString());
-		newTask.setAttribute(STATUS, task.getStatus());
-		newTask.setAttribute(RCPT, task.getRcpt());
+	public void deleteTaskFromXML(Task taskToDelete) {
+		synchronized (tasksDoc) {
+			Node taskToDeleteAsNode = convertTaskToNode(taskToDelete);
+			tasksDoc.removeChild(taskToDeleteAsNode);
+		}
+	}
+
+	private Node convertTaskToNode(Task task) {
+		Element taskAsElement = tasksDoc.createElement(ITEM);
+		taskAsElement.setAttribute(USER, task.getTaskCreator());
+		taskAsElement.setAttribute(TITLE, task.getTitle());
+		taskAsElement.setAttribute(DateOfCreation, task.getDateOfCreation().toString());
+		taskAsElement.setAttribute(DUEDATE, task.getDueDate().toString());
+		taskAsElement.setAttribute(STATUS, task.getStatus());
+		taskAsElement.setAttribute(RCPT, task.getRcpt());
 		String isCompleted = Boolean.toString(task.isCompleted());
-		newTask.setAttribute(ISCOMPLETED, isCompleted);
+		taskAsElement.setAttribute(ISCOMPLETED, isCompleted);
 		String taskExpiredHadBeenNotify = Boolean.toString(task.isTaskExpiredHadBeenNotify());
-		newTask.setAttribute("taskExpiredHadBeenNotify", taskExpiredHadBeenNotify);
+		taskAsElement.setAttribute("taskExpiredHadBeenNotify", taskExpiredHadBeenNotify);
 
 		Element _content = tasksDoc.createElement(CONTENT);
 		_content.appendChild(tasksDoc.createTextNode(task.getContent()));
-		newTask.appendChild(_content);
+		taskAsElement.appendChild(_content);
 
-		Node taskes = tasksDoc.getFirstChild();
-		taskes.appendChild(newTask);
-
+		return taskAsElement;
 	}
 
 	public void addReminder(Reminder reminder) {
+		synchronized (reminderDoc) {
+			Node newRemionder = convertReminderToNode(reminder);
+			reminderDoc.getFirstChild().appendChild(newRemionder);
+		}
+	}
 
-		Element newRemainder = reminderDoc.createElement(ITEM);
-		newRemainder.setAttribute(USER, reminder.getUser());
-		newRemainder.setAttribute(DateOfCreation, reminder.getDateOfCreation().toString());
-		newRemainder.setAttribute(DateOfReminding, reminder.getDateOfReminding().toString());
+	public void deleteReminderFromXML(Reminder reminderToDelete) {
+		synchronized (reminderDoc) {
+			Node reminderToDeleteAsNode = convertReminderToNode(reminderToDelete);
+			reminderDoc.removeChild(reminderToDeleteAsNode);
+		}
+	}
+
+	private Node convertReminderToNode(Reminder reminder) {
+		Element remainderAsElement = reminderDoc.createElement(ITEM);
+		remainderAsElement.setAttribute(USER, reminder.getUser());
+		remainderAsElement.setAttribute(DateOfCreation, reminder.getDateOfCreation().toString());
+		remainderAsElement.setAttribute(DateOfReminding, reminder.getDateOfReminding().toString());
 		String hadBeenSend = Boolean.toString(reminder.isHadBeenSend());
-		newRemainder.setAttribute(HadBeenSend, hadBeenSend);
+		remainderAsElement.setAttribute(HadBeenSend, hadBeenSend);
 
 		Element _content = reminderDoc.createElement(CONTENT);
 		_content.appendChild(reminderDoc.createTextNode(reminder.getContent()));
-		newRemainder.appendChild(_content);
+		remainderAsElement.appendChild(_content);
 
-		Node remainders = reminderDoc.getFirstChild();
-		remainders.appendChild(newRemainder);
+		return remainderAsElement;
 	}
 
 	public void addPoll(Poll poll) {
+		synchronized (pollsDoc) {
+			Node newPoll = convertPollToNode(poll);
+			pollsDoc.getFirstChild().appendChild(newPoll);
+		}
+	}
 
+	public void deletePollFromXML(Poll pollToDelete) {
+		synchronized (pollsDoc) {
+			Node pollToDeleteAsNode = convertPollToNode(pollToDelete);
+			pollsDoc.removeChild(pollToDeleteAsNode);
+		}
+	}
+
+	private Node convertPollToNode(Poll poll) {
 		Element _rcpts = pollsDoc.createElement("rcpts");
 		Element _answers = pollsDoc.createElement("answers");
 
-		Element newPoll = pollsDoc.createElement(ITEM);
-		newPoll.setAttribute(USER, poll.getPollCreator());
-		newPoll.setAttribute(TITLE, poll.getTitle());
-		newPoll.setAttribute(DATE, poll.getDateOfCreation().toString());
-		newPoll.setAttribute(SUBJECT, poll.getSubject());
-		newPoll.setAttribute("question", poll.getQuestion());
-		newPoll.setAttribute(ISCOMPLETED, Boolean.toString(poll.isCompleted()));
+		Element pollAsElement = pollsDoc.createElement(ITEM);
+		pollAsElement.setAttribute(USER, poll.getPollCreator());
+		pollAsElement.setAttribute(TITLE, poll.getTitle());
+		pollAsElement.setAttribute(DATE, poll.getDateOfCreation().toString());
+		pollAsElement.setAttribute(SUBJECT, poll.getSubject());
+		pollAsElement.setAttribute("question", poll.getQuestion());
+		pollAsElement.setAttribute(ISCOMPLETED, Boolean.toString(poll.isCompleted()));
 
 		// Answers part.
-
 		Element _answer;
 
 		for (String answer : poll.getAnswers()) {
@@ -138,7 +173,7 @@ public class DataXMLManager {
 			_answers.appendChild(_answers);
 		}
 
-		newPoll.appendChild(_answers);
+		pollAsElement.appendChild(_answers);
 
 		// Recipients part.
 		Element _rcpt;
@@ -150,22 +185,23 @@ public class DataXMLManager {
 			_rcpts.appendChild(_rcpt);
 		}
 
-		newPoll.appendChild(_rcpts);
+		pollAsElement.appendChild(_rcpts);
 
-		Node polls = pollsDoc.getFirstChild();
-		polls.appendChild(newPoll);
+		return pollAsElement;
 	}
 
 	public LinkedList<Task> retrieveTasks() {
-		LinkedList<Task> taskList = new LinkedList<Task>();
-		NodeList items = tasksDoc.getElementsByTagName(ITEM);
+		synchronized (tasksDoc) {
+			LinkedList<Task> taskList = new LinkedList<Task>();
+			NodeList items = tasksDoc.getElementsByTagName(ITEM);
 
-		for (int i = 0; i < items.getLength(); i++) {
-			Task taskFromFile = createTaskFromItem(items.item(i));
-			taskList.add(taskFromFile);
+			for (int i = 0; i < items.getLength(); i++) {
+				Task taskFromFile = createTaskFromItem(items.item(i));
+				taskList.add(taskFromFile);
+			}
+
+			return taskList;
 		}
-
-		return taskList;
 	}
 
 	private Task createTaskFromItem(Node item) {

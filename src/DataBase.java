@@ -79,9 +79,25 @@ public class DataBase {
 	}
 
 	public void addTask(Task newTask) {
-		synchronized (reminderList) {
+		synchronized (taskList) {
 			taskList.add(newTask);
 		}
+		dataXMLManager.addTask(newTask);
+	}
+
+	public void deleteTask(Task taskToDelete) {
+		synchronized (taskList) {
+			taskList.remove(taskToDelete);
+		}
+		dataXMLManager.deleteTaskFromXML(taskToDelete);
+	}
+
+	public void editTask(Task newTask, Task oldTask) {
+
+		taskList.remove(oldTask);
+		taskList.add(newTask);
+
+		dataXMLManager.deleteTaskFromXML(oldTask);
 		dataXMLManager.addTask(newTask);
 	}
 
@@ -89,13 +105,45 @@ public class DataBase {
 		synchronized (reminderList) {
 			reminderList.add(newReminder);
 		}
-		dataXMLManager.addReminder(newReminder);	
+		dataXMLManager.addReminder(newReminder);
+	}
+
+	public void deleteReminder(Reminder reminderToDelete) {
+		synchronized (reminderList) {
+			reminderList.remove(reminderToDelete);
+		}
+		dataXMLManager.deleteReminderFromXML(reminderToDelete);
+	}
+
+	public void editReminder(Reminder newReminder, Reminder oldReminder) {
+
+		reminderList.remove(oldReminder);
+		reminderList.add(newReminder);
+
+		dataXMLManager.deleteReminderFromXML(oldReminder);
+		dataXMLManager.addReminder(newReminder);
 	}
 
 	public synchronized void addPoll(Poll newPoll) {
 		synchronized (pollList) {
 			pollList.add(newPoll);
 		}
+		dataXMLManager.addPoll(newPoll);
+	}
+
+	public void deletePoll(Poll pollToDelete) {
+		synchronized (pollList) {
+			pollList.remove(pollToDelete);
+		}
+		dataXMLManager.deletePollFromXML(pollToDelete);
+	}
+
+	public void editPoll(Poll newPoll, Poll oldPoll) {
+
+		pollList.remove(oldPoll);
+		pollList.add(newPoll);
+
+		dataXMLManager.deletePollFromXML(oldPoll);
 		dataXMLManager.addPoll(newPoll);
 	}
 
