@@ -14,7 +14,8 @@ import java.util.Date;
 import java.util.LinkedList;
 
 public class DataXMLManager {
-	public static String TIME_FORMAT = "";
+
+	public static String TIME_FORMAT = "dd/MM/yyyy HH:mm";
 	public static String USER = "user";
 	public static String DATE = "date";
 	public static String DateOfCreation = "dateOfCreation";
@@ -92,8 +93,9 @@ public class DataXMLManager {
 		Element taskAsElement = tasksDoc.createElement(ITEM);
 		taskAsElement.setAttribute(USER, task.getTaskCreator());
 		taskAsElement.setAttribute(TITLE, task.getTitle());
-		taskAsElement.setAttribute(DateOfCreation, task.getDateOfCreation().toString());
-		taskAsElement.setAttribute(DUEDATE, task.getDueDate().toString());
+		taskAsElement.setAttribute(DateOfCreation,
+				new SimpleDateFormat("dd/MM/yyyy HH:mm").format(task.getDateOfCreation()));
+		taskAsElement.setAttribute(DUEDATE, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(task.getDueDate()));
 		taskAsElement.setAttribute(STATUS, task.getStatus());
 		taskAsElement.setAttribute(RCPT, task.getRcpt());
 		String isCompleted = Boolean.toString(task.isCompleted());
@@ -125,8 +127,10 @@ public class DataXMLManager {
 	private Node convertReminderToNode(Reminder reminder) {
 		Element remainderAsElement = reminderDoc.createElement(ITEM);
 		remainderAsElement.setAttribute(USER, reminder.getUser());
-		remainderAsElement.setAttribute(DateOfCreation, reminder.getDateOfCreation().toString());
-		remainderAsElement.setAttribute(DateOfReminding, reminder.getDateOfReminding().toString());
+		remainderAsElement.setAttribute(DateOfCreation,
+				new SimpleDateFormat("dd/MM/yyyy HH:mm").format(reminder.getDateOfCreation()));
+		remainderAsElement.setAttribute(DateOfReminding,
+				new SimpleDateFormat("dd/MM/yyyy HH:mm").format(reminder.getDateOfReminding()));
 		String hadBeenSend = Boolean.toString(reminder.isHadBeenSend());
 		remainderAsElement.setAttribute(HadBeenSend, hadBeenSend);
 
@@ -158,7 +162,7 @@ public class DataXMLManager {
 		Element pollAsElement = pollsDoc.createElement(ITEM);
 		pollAsElement.setAttribute(USER, poll.getPollCreator());
 		pollAsElement.setAttribute(TITLE, poll.getTitle());
-		pollAsElement.setAttribute(DATE, poll.getDateOfCreation().toString());
+		pollAsElement.setAttribute(DATE, new SimpleDateFormat("dd/MM/yyyy HH:mm").format(poll.getDateOfCreation()));
 		pollAsElement.setAttribute(SUBJECT, poll.getSubject());
 		pollAsElement.setAttribute("question", poll.getQuestion());
 		pollAsElement.setAttribute(ISCOMPLETED, Boolean.toString(poll.isCompleted()));
@@ -206,7 +210,6 @@ public class DataXMLManager {
 
 	private Task createTaskFromItem(Node item) {
 
-		SimpleDateFormat formatter = new SimpleDateFormat(TIME_FORMAT);
 		Date dateOfCreation = null;
 		Date dueDate = null;
 		NamedNodeMap att = item.getAttributes();
@@ -217,8 +220,8 @@ public class DataXMLManager {
 		String dateOfCreationInString = att.getNamedItem(DateOfCreation).getNodeValue();
 		String dueDateInString = att.getNamedItem(DUEDATE).getNodeValue();
 		try {
-			dateOfCreation = formatter.parse(dateOfCreationInString);
-			dueDate = formatter.parse(dueDateInString);
+			dateOfCreation = new SimpleDateFormat("dd/MM/yyyy HH:mm").parse(dateOfCreationInString);
+			dueDate = new SimpleDateFormat("dd/MM/yyyy HH:mm").parse(dueDateInString);
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
@@ -250,7 +253,6 @@ public class DataXMLManager {
 
 	private Reminder createReminderFromItem(Node item) {
 
-		SimpleDateFormat formatter = new SimpleDateFormat(TIME_FORMAT);
 		Date dateOfCreation = null;
 		Date dateOfReminding = null;
 		NamedNodeMap att = item.getAttributes();
@@ -260,8 +262,8 @@ public class DataXMLManager {
 		String dateOfCreationInString = att.getNamedItem(DateOfCreation).getNodeValue();
 		String dateOfRemindingInString = att.getNamedItem(DateOfReminding).getNodeValue();
 		try {
-			dateOfCreation = formatter.parse(dateOfCreationInString);
-			dateOfReminding = formatter.parse(dateOfRemindingInString);
+			dateOfCreation = new SimpleDateFormat("dd/MM/yyyy HH:mm").parse(dateOfCreationInString);
+			dateOfReminding = new SimpleDateFormat("dd/MM/yyyy HH:mm").parse(dateOfRemindingInString);
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
@@ -288,7 +290,6 @@ public class DataXMLManager {
 
 	private Poll createPollFromItem(Node item) {
 
-		SimpleDateFormat formatter = new SimpleDateFormat(TIME_FORMAT);
 		Date dateOfCreation = null;
 		NamedNodeMap att = item.getAttributes();
 
@@ -297,7 +298,7 @@ public class DataXMLManager {
 		String dateOfCreationInString = att.getNamedItem(DATE).getNodeValue();
 
 		try {
-			dateOfCreation = formatter.parse(dateOfCreationInString);
+			dateOfCreation = new SimpleDateFormat("dd/MM/yyyy HH:mm").parse(dateOfCreationInString);
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
