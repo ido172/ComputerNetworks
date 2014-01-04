@@ -115,7 +115,6 @@ public class DataXMLManager {
 		Element newPoll = pollsDoc.createElement(ITEM);
 		newPoll.setAttribute(USER, poll.getUser());
 		newPoll.setAttribute(DATE, poll.getDate().toString());
-		newPoll.setAttribute(TIME, poll.getTime());
 		newPoll.setAttribute("question", poll.getQuestion());
 		newPoll.setAttribute(ISCOMPLETED, poll.getIsCompleted());
 
@@ -123,10 +122,10 @@ public class DataXMLManager {
 		Element _rcpts = reminderDoc.createElement("rcpts");
 		Element _contact;
 
-		for (String rcpt : poll.getRcpts()) {
+		for (PollParticipant rcpt : poll.getRcpts()) {
 			_contact = reminderDoc.createElement("contact");
 			_contact.setAttribute("hasReplyed", "true"); // There is a problem here with the attribute hasReplyed.
-			_contact.appendChild(reminderDoc.createTextNode(rcpt));
+			//_contact.appendChild(reminderDoc.createTextNode(rcpt));
 
 			_rcpts.appendChild(_rcpts);
 		}
@@ -269,7 +268,7 @@ public class DataXMLManager {
 		//
 		// }
 
-		Poll pollFromFile = new Poll(user, (Date) date, time, title, question, isCompleted, rcpts, answers);
+		Poll pollFromFile = null;//new Poll(user, (Date) date, time, title, question, isCompleted, rcpts, answers);
 
 		return pollFromFile;
 	}
