@@ -1,5 +1,10 @@
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -42,21 +47,21 @@ public class DataXMLManager {
 	private File pollsDataBase;
 	private Document pollsDoc;
 
+	private Transformer transformer;
+
 	public DataXMLManager() {
 
 		try {
-			// Create the files if they do not exists.
-			if (!tasksDataBase.exists()) {
-				tasksDataBase = new File(ConfigFile.taskFilePath);
-			}
 
-			if (!remindersDataBase.exists()) {
-				this.remindersDataBase = new File(ConfigFile.reminderFilePath);
-			}
+			String filePath = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+			// tasksDataBase = new File(ConfigFile.taskFilePath);
+			tasksDataBase = new File(filePath + "tasks.xml");
 
-			if (!pollsDataBase.exists()) {
-				this.pollsDataBase = new File(ConfigFile.pollFilePath);
-			}
+			// this.remindersDataBase = new File(ConfigFile.reminderFilePath);
+			remindersDataBase = new File(filePath + "reminders.xml");
+
+			// this.pollsDataBase = new File(ConfigFile.pollFilePath);
+			pollsDataBase = new File(filePath + "polls.xml");
 
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -70,6 +75,9 @@ public class DataXMLManager {
 			reminderDoc.getDocumentElement().normalize();
 			pollsDoc.getDocumentElement().normalize();
 
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			transformer = transformerFactory.newTransformer();
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -79,6 +87,14 @@ public class DataXMLManager {
 		synchronized (tasksDoc) {
 			Node newTaskElement = convertTaskToNode(task);
 			tasksDoc.getFirstChild().appendChild(newTaskElement);
+
+			DOMSource source = new DOMSource(tasksDoc);
+			StreamResult result = new StreamResult(tasksDataBase);
+			try {
+				transformer.transform(source, result);
+			} catch (TransformerException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -113,6 +129,14 @@ public class DataXMLManager {
 		synchronized (reminderDoc) {
 			Node newRemionder = convertReminderToNode(reminder);
 			reminderDoc.getFirstChild().appendChild(newRemionder);
+
+			DOMSource source = new DOMSource(reminderDoc);
+			StreamResult result = new StreamResult(remindersDataBase);
+			try {
+				transformer.transform(source, result);
+			} catch (TransformerException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -144,6 +168,14 @@ public class DataXMLManager {
 		synchronized (pollsDoc) {
 			Node newPoll = convertPollToNode(poll);
 			pollsDoc.getFirstChild().appendChild(newPoll);
+
+			DOMSource source = new DOMSource(pollsDoc);
+			StreamResult result = new StreamResult(pollsDataBase);
+			try {
+				transformer.transform(source, result);
+			} catch (TransformerException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -173,7 +205,7 @@ public class DataXMLManager {
 			_answer = pollsDoc.createElement(ANSWER);
 			_answer.appendChild(pollsDoc.createTextNode(answer));
 
-			_answers.appendChild(_answers);
+			_answers.appendChild(_answer);
 		}
 
 		pollAsElement.appendChild(_answers);
@@ -226,7 +258,7 @@ public class DataXMLManager {
 		}
 
 		String status = att.getNamedItem(STATUS).getNodeValue();
-		String content = item.getFirstChild().getNodeValue();
+		String content = item.getFirstChild().getTextContent();
 		String rcpt = att.getNamedItem(RCPT).getNodeValue();
 		boolean isCompleted = Boolean.parseBoolean(att.getNamedItem(ISCOMPLETED).getNodeValue());
 		boolean taskExpiredHadBeenNotify = Boolean.parseBoolean(att.getNamedItem("taskExpiredHadBeenNotify")
@@ -267,7 +299,7 @@ public class DataXMLManager {
 			e.printStackTrace();
 		}
 
-		String content = item.getFirstChild().getNodeValue();
+		String content = item.getFirstChild().getTextContent();
 		boolean hadBeenSend = Boolean.parseBoolean(att.getNamedItem(HadBeenSend).getNodeValue());
 
 		Reminder reminderFromFile = new Reminder(user, title, dateOfCreation, dateOfReminding, content, hadBeenSend);
@@ -311,7 +343,7 @@ public class DataXMLManager {
 		LinkedList<String> answers = new LinkedList<String>();
 
 		for (int i = 0; i < answerstXML.getLength(); i++) {
-			answers.add(answerstXML.item(i).getNodeValue());
+			answers.add(answerstXML.item(i).getTextContent());
 		}
 
 		// Add the recipients.
@@ -320,7 +352,7 @@ public class DataXMLManager {
 
 		for (int i = 0; i < rcptsXML.getLength(); i++) {
 			String hadReplyed = rcptsXML.item(i).getAttributes().getNamedItem(HADREPLYED).getNodeValue();
-			String rcpt = rcptsXML.item(i).getNodeName();
+			String rcpt = rcptsXML.item(i).getTextContent();
 			rcpts.add(new PollParticipant(rcpt, Boolean.parseBoolean(hadReplyed)));
 
 		}
@@ -329,4 +361,5 @@ public class DataXMLManager {
 
 		return pollFromFile;
 	}
+
 }
