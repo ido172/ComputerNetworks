@@ -12,9 +12,7 @@ public class HttpResponse {
 	public static final String RESPONSE_500_INTERNAL_ERROR = "500 Internal Server Error";
 	public static final String RESPONSE_501_NOT_IMPLEMENTED = "501 Not Implemented";
 	public static final String RESPONSE_505_BAD_HTTP_VERSION = "505 HTTP Version Not Supported";
-	
 
-	
 	public static final String PLCAEHOLDER_TITLE= "[title]";
 	public static final String PLCAEHOLDER_BODY= "[body]";
 	
@@ -22,9 +20,6 @@ public class HttpResponse {
             										 "</HEAD><BODY><H1>"+PLCAEHOLDER_TITLE+"</H1>" +
             										 "<p>"+PLCAEHOLDER_BODY+"</P>" +
             										 "</BODY></HTML>";
-	
-
-	
 	private StringBuilder headResponse = null;
 	private StringBuilder bodyResponse = null;
 	

@@ -209,7 +209,7 @@ final class HttpRequestHandler implements Runnable {
 		}
 
 		else if (methodName.equals(HTTP_METHOD_POST)) {
-			result = httpResponseMaker.handleGETRequest(root, defaultPage);
+			result = httpResponseMaker.handlePOSTRequest(root, defaultPage);
 		}
 
 		else if (methodName.equals(HTTP_METHOD_OPTIONS)) {
