@@ -1,16 +1,14 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.HashMap;
-import java.util.Set;
 
 public class HttpResponseMaker {
 	private HttpRequestHandler httpRequest = null;
+	private HTMLCreator htmlCreator;
 
 	public HttpResponseMaker(HttpRequestHandler httpRequest) {
 		this.httpRequest = httpRequest;
+		htmlCreator = new HTMLCreator();
 	}
 
 	public HttpResponse handleGETRequest(String root, String defaultPage) throws IOException {
@@ -43,13 +41,18 @@ public class HttpResponseMaker {
 		
 		String response = HttpResponse.RESPONSE_200_OK;
 		String userName = null;
-		HttpParamsToTask handler = new HttpParamsToTask(httpRequest.httpRequestParams);
+		HttpParamsToTask handler = new HttpParamsToTask(httpRequest.dataBase, httpRequest.httpRequestParams);
 		if (location.equals("/main.html") &&  httpRequest.httpRequestParams.containsKey("login")) { // location is "/" no cookie
 			location = root + location.substring(1);
 			response = HttpResponse.RESPONSE_200_OK;
 			userName = httpRequest.httpRequestParams.get("login");
 		} else if (location.equals("/submit_reminder.html") && handler.isValidateReminder() ) {
-			handler.createReminder();
+			String user = getMailCookie();
+			if (handler.isEditRequest()) {
+				handler.editReminderInDateBase(user);
+			} else {
+				handler.createReminderInDataBase(user);
+			}
 			location = root + "reminders.html"; 
 			response = HttpResponse.RESPONSE_302_REDIRECT;
 		} else {
@@ -68,7 +71,7 @@ public class HttpResponseMaker {
 			String responseBody = FileToString.readFile(requestedFile);
 			switch (fileName.toLowerCase()) {
 				case "remainders.html":
-					responseBody = HTMLCreator.createRemainderPage(getMailCookie(), responseBody);
+					responseBody = htmlCreator.createRemainderPage(getMailCookie(), responseBody, httpRequest.dataBase);
 					break;
 				case "tasks.html":
 					break;

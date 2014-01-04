@@ -11,6 +11,7 @@ public class WebServer {
 	private String root;
 	private String defaultPage;
 	private int maxThreads;
+	private DataBase dataBase;
 
 	private ThreadPool threadPool;
 
@@ -49,7 +50,7 @@ public class WebServer {
 
 		// If read configuration file is successful start server.
 		if (readConfogFile()) {
-			
+			dataBase = new DataBase();
 			ServerSocket socket;
 
 			try {
@@ -65,7 +66,7 @@ public class WebServer {
 					Socket connection = socket.accept();
 
 					// Construct an object to process the HTTP request message.
-					HttpRequestHandler request = new HttpRequestHandler(connection, threadPool, root, defaultPage);
+					HttpRequestHandler request = new HttpRequestHandler(connection, threadPool, root, defaultPage, dataBase);
 
 					// Send HTTP request to thread poll for handling.
 					threadPool.handleNewHttpRequest(request);

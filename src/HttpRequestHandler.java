@@ -23,6 +23,7 @@ final class HttpRequestHandler implements Runnable {
 	public boolean isTerminatedByClient = false;
 	public HashMap<String, String> parsedHttpRequest = null;
 	public HashMap<String, String> httpRequestParams = null;
+	public DataBase dataBase; 
 	private Socket socket;
 	private String root;
 	private String defaultPage;
@@ -32,13 +33,14 @@ final class HttpRequestHandler implements Runnable {
 	private HttpResponseMaker httpResponseMaker = null;
 
 	// Constructor
-	public HttpRequestHandler(Socket socket, ThreadPool threadPool, String root, String defaultPage) {
+	public HttpRequestHandler(Socket socket, ThreadPool threadPool, String root, String defaultPage, DataBase dataBase) {
 		this.socket = socket;
 		this.thraedPool = threadPool;
 
 		// If root name does not end with '\' add it
 		this.root = (root.charAt(root.length() - 1) == '\\') ? root : root + '\\';
 		this.defaultPage = defaultPage;
+		this.dataBase = dataBase;
 		httpResponseMaker = new HttpResponseMaker(this);
 	}
 
