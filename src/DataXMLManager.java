@@ -150,12 +150,12 @@ public class DataXMLManager {
 	private Node convertReminderToNode(Reminder reminder) {
 		Element remainderAsElement = reminderDoc.createElement(ITEM);
 		remainderAsElement.setAttribute(USER, reminder.getUser());
+		remainderAsElement.setAttribute(TITLE, reminder.getTitle());
 		remainderAsElement.setAttribute(DateOfCreation,
 				new SimpleDateFormat(TIME_FORMAT).format(reminder.getDateOfCreation()));
 		remainderAsElement.setAttribute(DateOfReminding,
 				new SimpleDateFormat(TIME_FORMAT).format(reminder.getDateOfReminding()));
-		String hadBeenSend = Boolean.toString(reminder.isHadBeenSend());
-		remainderAsElement.setAttribute(HadBeenSend, hadBeenSend);
+		remainderAsElement.setAttribute(HadBeenSend, Boolean.toString(reminder.isHadBeenSend()));
 
 		Element _content = reminderDoc.createElement(CONTENT);
 		_content.appendChild(reminderDoc.createTextNode(reminder.getContent()));

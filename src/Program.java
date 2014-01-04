@@ -9,16 +9,19 @@ public class Program {
 		// myServer.runServer();
 
 		String pollCreator = "shaybozo@gmail.com";
-		String title = "Who is my bitch - question";
+		String title = "Task - be my bitch";
 		Date dateOfCreation = new Date();
 		String subject = "subject";
 		String question = "Who is my bitch?????";
+		String rcpt = "uri.steinf@gmail.com";
+		String title2 = "Reminder - you are my bitch";
+
 		LinkedList<String> answers = new LinkedList<String>();
 		answers.add("ido");
 		answers.add("reuven");
 		answers.add("uri");
 		answers.add("ofer");
-		
+
 		PollParticipant ido = new PollParticipant("ido172@gmail.com", false);
 		PollParticipant uri = new PollParticipant("Uri S <uri.steinf@gmail.com>", false);
 		PollParticipant reuven = new PollParticipant("Reuven Eliyahu <ruvene@gmail.com>", false);
@@ -29,16 +32,21 @@ public class Program {
 		rcpts.add(uri);
 		rcpts.add(reuven);
 		boolean isCompleted = false;
+		boolean taskExpiredHadBeenNotify = false;
 
-		Poll poll = new Poll(pollCreator, title, dateOfCreation, subject, question, answers, rcpts, isCompleted);
-//		Task task = new Task(null, null, null, null, null, null, null, false, false);
-//		Reminder reminder = new Reminder(null, null, null, null, null, false);
+		Task task = new Task(pollCreator, title, dateOfCreation, dateOfCreation, "status", "content", rcpt,
+				isCompleted, taskExpiredHadBeenNotify);
+		
+		Reminder reminder = new Reminder(pollCreator, title2, dateOfCreation, dateOfCreation, "content", false);
 
 		DataXMLManager dataBase = new DataXMLManager();
-//		dataBase.addTask(task);
-//		dataBase.addReminder(reminder);
-		
+		dataBase.addTask(task);
+		dataBase.addReminder(reminder);
+
+		LinkedList<Task> tasks = dataBase.retrieveTasks();
+		LinkedList<Reminder> reminder1 = dataBase.retrieveReminders();
 		LinkedList<Poll> polls = dataBase.retrievePolls();
-		System.out.println(polls.toString());
+		
+		System.out.println("colllllll");
 	}
 }
