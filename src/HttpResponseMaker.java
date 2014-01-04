@@ -72,7 +72,7 @@ public class HttpResponseMaker {
 			String contentType = FileTypeToContentType.convert(fileName);
 			String responseBody = FileToString.readFile(requestedFile);
 			switch (fileName.toLowerCase()) {
-				case "remainders.html":
+				case "reminders.html":
 					responseBody = htmlCreator.createRemainderPage(getMailCookie(), responseBody, httpRequest.dataBase);
 					break;
 				case "tasks.html":
