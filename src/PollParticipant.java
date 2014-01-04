@@ -1,10 +1,9 @@
-
 public class PollParticipant {
-	
+
 	private String userName;
 	private boolean hadAnswer;
-	
-	public PollParticipant(String userName, boolean hadAnswer){
+
+	public PollParticipant(String userName, boolean hadAnswer) {
 		this.userName = userName;
 		this.setHadAnswer(hadAnswer);
 	}
@@ -24,6 +23,5 @@ public class PollParticipant {
 	public void setHadAnswer(boolean hadAnswer) {
 		this.hadAnswer = hadAnswer;
 	}
-	
-	
+
 }

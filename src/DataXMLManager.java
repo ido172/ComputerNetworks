@@ -83,9 +83,9 @@ public class DataXMLManager {
 		newTask.setAttribute(DUEDATE, task.getDueDate().toString());
 		newTask.setAttribute(STATUS, task.getStatus());
 		newTask.setAttribute(RCPT, task.getRcpt());
-		String isCompleted = task.isCompleted() ? "true" : "false";
+		String isCompleted = Boolean.toString(task.isCompleted());
 		newTask.setAttribute(ISCOMPLETED, isCompleted);
-		String taskExpiredHadBeenNotify = task.isTaskExpiredHadBeenNotify() ? "true" : "false";
+		String taskExpiredHadBeenNotify = Boolean.toString(task.isTaskExpiredHadBeenNotify());
 		newTask.setAttribute("taskExpiredHadBeenNotify", taskExpiredHadBeenNotify);
 
 		Element _content = tasksDoc.createElement(CONTENT);
@@ -103,7 +103,7 @@ public class DataXMLManager {
 		newRemainder.setAttribute(USER, reminder.getUser());
 		newRemainder.setAttribute(DateOfCreation, reminder.getDateOfCreation().toString());
 		newRemainder.setAttribute(DateOfReminding, reminder.getDateOfReminding().toString());
-		String hadBeenSend = reminder.isHadBeenSend() ? "true" : "false";
+		String hadBeenSend = Boolean.toString(reminder.isHadBeenSend());
 		newRemainder.setAttribute(HadBeenSend, hadBeenSend);
 
 		Element _content = reminderDoc.createElement(CONTENT);
@@ -190,9 +190,9 @@ public class DataXMLManager {
 		String status = att.getNamedItem(STATUS).getNodeValue();
 		String content = item.getFirstChild().getNodeValue();
 		String rcpt = att.getNamedItem(RCPT).getNodeValue();
-		boolean isCompleted = (att.getNamedItem(ISCOMPLETED).getNodeValue().equals("true")) ? true : false;
-		boolean taskExpiredHadBeenNotify = (att.getNamedItem("taskExpiredHadBeenNotify").getNodeValue().equals("true")) ? true
-				: false;
+		boolean isCompleted = Boolean.parseBoolean(att.getNamedItem(ISCOMPLETED).getNodeValue());
+		boolean taskExpiredHadBeenNotify = Boolean.parseBoolean(att.getNamedItem("taskExpiredHadBeenNotify")
+				.getNodeValue());
 
 		Task taskFromFile = new Task(taskCreator, title, dateOfCreation, dueDate, status, content, rcpt, isCompleted,
 				taskExpiredHadBeenNotify);
@@ -231,7 +231,7 @@ public class DataXMLManager {
 		}
 
 		String content = item.getFirstChild().getNodeValue();
-		boolean hadBeenSend = (att.getNamedItem(HadBeenSend).getNodeValue().equals("true")) ? true : false;
+		boolean hadBeenSend = Boolean.parseBoolean(att.getNamedItem(HadBeenSend).getNodeValue());
 
 		Reminder reminderFromFile = new Reminder(user, title, dateOfCreation, dateOfReminding, content, hadBeenSend);
 
@@ -251,18 +251,26 @@ public class DataXMLManager {
 	}
 
 	private Poll createPollFromItem(Node item) {
-		// Poll(String pollCreator, String title, Date dateOfCreation, String subject, String question,
-		// LinkedList<String> answers, LinkedList<PollParticipant> rcpts, boolean isCompleted)
+
+		SimpleDateFormat formatter = new SimpleDateFormat(TIME_FORMAT);
+		Date dateOfCreation = null;
 		NamedNodeMap att = item.getAttributes();
 
 		String user = att.getNamedItem(USER).getNodeValue();
 		String title = att.getNamedItem(TITLE).getNodeValue();
-		String date = att.getNamedItem(DATE).getNodeValue();
+		String dateOfCreationInString = att.getNamedItem(DATE).getNodeValue();
+
+		try {
+			dateOfCreation = formatter.parse(dateOfCreationInString);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+
 		String subject = att.getNamedItem(SUBJECT).getNodeValue();
 		String question = att.getNamedItem("question").getNodeValue();
-		String isCompleted = att.getNamedItem(ISCOMPLETED).getNodeValue();
+		boolean isCompleted = Boolean.parseBoolean(att.getNamedItem(ISCOMPLETED).getNodeValue());
 
-		// Adds the answers
+		// Adds the answers.
 		NodeList answerstXML = item.getFirstChild().getChildNodes();
 		LinkedList<String> answers = new LinkedList<String>();
 
@@ -270,19 +278,18 @@ public class DataXMLManager {
 			answers.add(answerstXML.item(i).getNodeValue());
 		}
 
-		// Add the recpts.
+		// Add the recipients.
 		NodeList rcptsXML = item.getLastChild().getChildNodes();
 		LinkedList<PollParticipant> rcpts = new LinkedList<PollParticipant>();
-		PollParticipant pollParticipan = null;
 
 		for (int i = 0; i < rcptsXML.getLength(); i++) {
-			rcptsXML.item(i).getAttributes().getNamedItem(HADREPLYED);
-			// pollParticipan = new();
-			rcpts.add(pollParticipan);
+			String hadReplyed = rcptsXML.item(i).getAttributes().getNamedItem(HADREPLYED).getNodeValue();
+			String rcpt = rcptsXML.item(i).getNodeName();
+			rcpts.add(new PollParticipant(rcpt, Boolean.parseBoolean(hadReplyed)));
 
 		}
 
-		Poll pollFromFile = null;// new Poll(user, (Date) date, time, title, question, isCompleted, rcpts, answers);
+		Poll pollFromFile = new Poll(user, title, dateOfCreation, subject, question, answers, rcpts, isCompleted);
 
 		return pollFromFile;
 	}
