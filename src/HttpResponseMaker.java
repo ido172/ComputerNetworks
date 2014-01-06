@@ -16,11 +16,15 @@ public class HttpResponseMaker {
 		String location = httpRequest.parsedHttpRequest.get(RequestParser.LOCATION);
 		String mailInCookie = getMailCookie();
 		String response;
-		if (location.length() == 1 && mailInCookie == null) { // location is "/" no cookie
+		String cookie = null;
+		if ((location.length() == 1 || location.equals("/index.html")) && mailInCookie == null) { // location is "/" no cookie
 			location = root + defaultPage;
 			response = HttpResponse.RESPONSE_200_OK;
-			//
-		} else if (location.length() == 1 || location.equals("/index.html") || location.contains("submit")) { // has cookie
+		} else if (location.equals("/index.html") && httpRequest.httpRequestParams.containsKey("logout")) {
+			location = root + location.substring(1);
+			response = HttpResponse.RESPONSE_200_OK;
+			cookie = "";
+		} else if ((location.length() == 1 || location.equals("/index.html") || location.contains("submit")) && mailInCookie != null) { // has cookie
 			location = root + "main.html"; //!!!1explain this!!!!!!
 			response = HttpResponse.RESPONSE_302_REDIRECT;
 		}  else if (mailInCookie == null) {
@@ -31,7 +35,7 @@ public class HttpResponseMaker {
 			response = HttpResponse.RESPONSE_200_OK;
 		}
 
-		return responseFromFile(response, location, null);
+		return responseFromFile(response, location, cookie);
 	}
 	
 	
@@ -133,9 +137,12 @@ public class HttpResponseMaker {
 		}
 		httpResponse.appendHeader(HttpHeaders.HEADER_CONTENT_LENGTH, length);
 		httpResponse.appendHeader(HttpHeaders.HEADER_CONNECTION, connection);
-		if (cookie != null) {
-			httpResponse.appendHeader(HttpHeaders.HEADER_SET_COOKIE, HttpHeaders.COOKIE_VALUE + cookie);
+		if (cookie!= null && cookie.length() == 0) {
+			httpResponse.appendHeader(HttpHeaders.HEADER_SET_COOKIE, HttpHeaders.COOKIE_PARAM + "=" + HttpHeaders.COOKIE_DELETED_VALUE);
+		} else if (cookie != null) {
+			httpResponse.appendHeader(HttpHeaders.HEADER_SET_COOKIE, HttpHeaders.COOKIE_PARAM + "=" + cookie);
 		}
+		
 		httpResponse.appendBody(responseBody);
 		return httpResponse;
 	}
@@ -143,9 +150,9 @@ public class HttpResponseMaker {
 	private String getMailCookie() {
 		String result = null;
 		if (httpRequest.parsedHttpRequest.containsKey(HttpHeaders.HEADER_COOKIE.toLowerCase())
-				&& httpRequest.parsedHttpRequest.get(HttpHeaders.HEADER_COOKIE.toLowerCase()).contains("usermail-")) {
+				&& httpRequest.parsedHttpRequest.get(HttpHeaders.HEADER_COOKIE.toLowerCase()).contains(HttpHeaders.COOKIE_PARAM)) {
 			String cookie = httpRequest.parsedHttpRequest.get(HttpHeaders.HEADER_COOKIE.toLowerCase());
-			result = cookie.split("-")[1];
+			result = (cookie.split("=")[1].equals(HttpHeaders.COOKIE_DELETED_VALUE)) ? null : cookie.split("=")[1] ;
 		}
 
 		return result;
