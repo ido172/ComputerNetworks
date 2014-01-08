@@ -67,7 +67,7 @@ public class HttpParamsToTask {
 			String time = URLDecoder.decode(params.get(prefix + DataXMLManager.TIME), "UTF-8");
 			Date parsedDate = new Date();
 			parsedDate = new SimpleDateFormat("dd/MM/yyyy HH:mm").parse(date+" "+time);
-			return new Reminder(user, subject, new Date(), parsedDate, content, false);
+			return new Reminder(user, subject, new Date(), parsedDate, content, false, 1);
 		} catch (UnsupportedEncodingException e) {
 			String subject = params.get(prefix + DataXMLManager.SUBJECT);
 			String content = params.get(prefix + DataXMLManager.CONTENT);
@@ -76,7 +76,7 @@ public class HttpParamsToTask {
 			Date parsedDate = new Date();
 			try {
 				parsedDate = new SimpleDateFormat("dd/MM/yyyy HH:mm").parse(date+" "+time);
-				return new Reminder(user, subject, new Date(), parsedDate, content, false);
+				return new Reminder(user, subject, new Date(), parsedDate, content, false, 1);
 			} catch (ParseException ex) {
 				ex.printStackTrace();
 				return null;
