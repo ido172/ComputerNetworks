@@ -23,10 +23,10 @@ final class HttpRequestHandler implements Runnable {
 	public boolean isTerminatedByClient = false;
 	public HashMap<String, String> parsedHttpRequest = null;
 	public HashMap<String, String> httpRequestParams = null;
-	public DataBase dataBase; 
+	public DataBase dataBase;
+	public String root;
+	public String defaultPage;
 	private Socket socket;
-	private String root;
-	private String defaultPage;
 	private ThreadPool thraedPool = null;
 	private DataOutputStream outToClient = null;
 	private String request;
@@ -202,16 +202,15 @@ final class HttpRequestHandler implements Runnable {
 		HttpResponse result = null;
 
 		if (methodName.equals(HTTP_METHOD_GET) || isHeadRequest) {
-			result = httpResponseMaker.handleGETRequest(root, defaultPage);
+			result = httpResponseMaker.handleGETRequest();
 		}
 
 		else if (methodName.equals(HTTP_METHOD_TRACE)) {
-			result = httpResponseMaker.makeHttpResponse(HttpResponse.RESPONSE_200_OK, request,
-					HttpHeaders.CONTENT_TYPE_MESSAGE, null);
+			result = httpResponseMaker.makeHttpResponse(HttpResponse.RESPONSE_200_OK, request, HttpHeaders.CONTENT_TYPE_MESSAGE, null, null);
 		}
 
 		else if (methodName.equals(HTTP_METHOD_POST)) {
-			result = httpResponseMaker.handlePOSTRequest(root, defaultPage);
+			result = httpResponseMaker.handlePOSTRequest();
 		}
 
 		else if (methodName.equals(HTTP_METHOD_OPTIONS)) {

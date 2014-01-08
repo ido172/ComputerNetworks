@@ -114,8 +114,8 @@ public class WebServer {
 		String pollCreator = "shaybozo@gmail.com";
 		String title = "Task - you need to be my bitch";
 		Date dateOfCreation = new Date();
-		String subject = "subject";
-		String question = "Who is my bitch?????";
+		//String subject = "subject";
+		//String question = "Who is my bitch?????";
 		String rcpt = "uri.steinf@gmail.com";
 		String title2 = "Reminder - you are my bitch";
 
@@ -138,13 +138,13 @@ public class WebServer {
 		boolean taskExpiredHadBeenNotify = false;
 
 		Task task = new Task(pollCreator, title, dateOfCreation, dateOfCreation, "status", "content", rcpt,
-				isCompleted, taskExpiredHadBeenNotify, dataBase.getIDCounter().getCounterAndIncreaseByOne());
+				isCompleted, taskExpiredHadBeenNotify, dataBase.getNewID());
 
 		Reminder reminder = new Reminder(pollCreator, title2, dateOfCreation, dateOfCreation, "content", false,
-				dataBase.getIDCounter().getCounterAndIncreaseByOne());
+				dataBase.getNewID());
 		dataBase.addTask(task);
 		dataBase.addReminder(reminder);
-		String gg = "I Love U more then anything!!!!!";
+		
 		dataBase.addReminder(reminder);
 		dataBase.addReminder(reminder);
 		dataBase.addReminder(reminder);

@@ -12,6 +12,7 @@ public class HttpHeaders {
 	public static final String HEADER_ALLOW = "Allow";
 	public static final String HEADER_COOKIE = "Cookie";
 	public static final String HEADER_SET_COOKIE = "Set-Cookie";
+	public static final String HEADER_LOCATION = "Location";
 
 	/** header values constants **/
 	public static final String CONNECTION_CLOSE = "close";

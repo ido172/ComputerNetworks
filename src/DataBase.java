@@ -115,6 +115,15 @@ public class DataBase {
 		dataXMLManager.deleteTaskFromXML(taskToDelete);
 	}
 
+	public void deleteTaskByID(int taskIDToDelete) {
+		Task taskToDelete = retriveTaskByID(taskIDToDelete);
+
+		synchronized (taskList) {
+			taskList.remove(taskToDelete);
+		}
+		dataXMLManager.deleteTaskFromXML(taskToDelete);
+	}
+
 	public void editTask(Task newTask, Task oldTask) {
 
 		taskList.remove(oldTask);
@@ -124,14 +133,14 @@ public class DataBase {
 		dataXMLManager.addTask(newTask);
 	}
 
-	public void closeTask(int id){
+	public void closeTask(int id) {
 		Task completedTask = retriveTaskByID(id);
 		dataXMLManager.deleteTaskFromXML(completedTask);
 		completedTask.taskHadBeenCompleted();
 		dataXMLManager.addTask(completedTask);
-		
+
 	}
-	
+
 	public void editTask(int oldFormatTaskId, Task newFormatTask) {
 
 		Task oldTask = retriveTaskByID(oldFormatTaskId);
@@ -141,7 +150,7 @@ public class DataBase {
 		dataXMLManager.deleteTaskFromXML(oldTask);
 		dataXMLManager.addTask(newFormatTask);
 	}
-	
+
 	public void addReminder(Reminder newReminder) {
 		synchronized (reminderList) {
 			reminderList.add(newReminder);
@@ -157,16 +166,16 @@ public class DataBase {
 	}
 
 	public void deleteReminder(int reminderToDeleteID) {
-		
+
 		Reminder reminderToDelete = null;
-		
+
 		synchronized (reminderList) {
 			reminderToDelete = retriveReminderByID(reminderToDeleteID);
 			reminderList.remove(reminderToDelete);
 		}
 		dataXMLManager.deleteReminderFromXML(reminderToDelete);
 	}
-	
+
 	public void editReminder(Reminder newReminder, Reminder oldReminder) {
 
 		reminderList.remove(oldReminder);
@@ -177,7 +186,7 @@ public class DataBase {
 	}
 
 	public void editReminder(int oldFormatReminderId, Reminder newFormatReminder) {
-		
+
 		Reminder oldReminder = retriveReminderByID(oldFormatReminderId);
 		reminderList.remove(oldReminder);
 		reminderList.add(newFormatReminder);
@@ -312,8 +321,9 @@ public class DataBase {
 		dataXMLManager.deletePollFromXML(oldPoll);
 		dataXMLManager.addPoll(poll);
 	}
-	
-	public int getNewID(){
+
+	public int getNewID() {
 		return iDCounter.getCounterAndIncreaseByOne();
 	}
+
 }

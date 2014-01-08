@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class HttpParamsToTask {
+
 	HashMap<String, String> params;
 	DataBase dataBase;
 
@@ -14,7 +15,7 @@ public class HttpParamsToTask {
 		this.dataBase = dataBase;
 	}
 
-	public boolean isValidateReminder() {
+	public boolean isValidateNewReminder() {
 		try {
 			String subject = params.get(DataXMLManager.SUBJECT); 
 			String content = params.get(DataXMLManager.CONTENT);
@@ -25,6 +26,19 @@ public class HttpParamsToTask {
 		} catch (Exception e) {
 			return false;
 		}
+	}
+	
+	public boolean isValidateReminderEdit() {
+		boolean result = false;
+		if (params.containsKey(DataXMLManager.ID)) {
+			int id = Integer.parseInt(params.get(DataXMLManager.ID)); 
+			Reminder reminder = dataBase.retriveReminderByID(id);
+			if (reminder != null) {
+				result = true;
+			}
+		} 
+		
+		return result;
 	}
 
 	private boolean isValidDate(String date) {
@@ -48,45 +62,49 @@ public class HttpParamsToTask {
 		}
 	}
 	
-	public void createReminderInDataBase(String user) {
-		dataBase.addReminder(createReminder(user, ""));
+	public boolean createReminderInDataBase(String user) {
+		Reminder reminder = createReminder(user);
+		if (reminder != null) {
+			dataBase.addReminder(reminder);
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
-	public void editReminderInDateBase(String user) {
-		Reminder newReminder = createReminder(user, "");
-		Reminder oldReminder = createReminder(user, "original_");
-		dataBase.editReminder(newReminder, oldReminder);
+	public void editReminderInDateBase(String user, int reminderId) {
+		Reminder newReminder = createReminder(user);
+		dataBase.editReminder(reminderId, newReminder);
 	}
 
-	private Reminder createReminder(String user, String prefix) {
+	private Reminder createReminder(String user) {
 		
+		String subject, content, date, time, parsedUser;
+		
+		Date parsedDate = new Date();
 		try {
-			String subject = URLDecoder.decode(params.get(prefix + DataXMLManager.SUBJECT), "UTF-8");
-			String content = URLDecoder.decode(params.get(prefix + DataXMLManager.CONTENT), "UTF-8");
-			String date = URLDecoder.decode(params.get(prefix + DataXMLManager.DATE), "UTF-8");
-			String time = URLDecoder.decode(params.get(prefix + DataXMLManager.TIME), "UTF-8");
-			Date parsedDate = new Date();
-			parsedDate = new SimpleDateFormat("dd/MM/yyyy HH:mm").parse(date+" "+time);
-			return new Reminder(user, subject, new Date(), parsedDate, content, false, 1);
-		} catch (UnsupportedEncodingException e) {
-			String subject = params.get(prefix + DataXMLManager.SUBJECT);
-			String content = params.get(prefix + DataXMLManager.CONTENT);
-			String date = params.get(prefix + DataXMLManager.DATE);
-			String time = params.get(prefix + DataXMLManager.TIME);
-			Date parsedDate = new Date();
-			try {
-				parsedDate = new SimpleDateFormat("dd/MM/yyyy HH:mm").parse(date+" "+time);
-				return new Reminder(user, subject, new Date(), parsedDate, content, false, 1);
-			} catch (ParseException ex) {
-				ex.printStackTrace();
-				return null;
-			}
+			subject = URLDecoder.decode(params.get(DataXMLManager.SUBJECT), "UTF-8");
+			content = URLDecoder.decode(params.get(DataXMLManager.CONTENT), "UTF-8");
+			date = URLDecoder.decode(params.get(DataXMLManager.DATE), "UTF-8");
+			time = URLDecoder.decode(params.get(DataXMLManager.TIME), "UTF-8");
+			parsedUser = URLDecoder.decode(user, "UTF-8");
 			
-		} catch (ParseException e) {
+		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return null;
 		}
+		
+		try {
+			parsedDate = new SimpleDateFormat("dd/MM/yyyy HH:mm").parse(date+" "+time);
+		} catch (ParseException ex) {
+			ex.printStackTrace();
+			return null;
+		}
+		
+		return new Reminder(parsedUser, subject, new Date(), parsedDate, content, false, 1);
 	}
+	
+
 	
 	public boolean isEditRequest() {
 		return params.containsKey("edit") && params.get("edit").equals("true");
@@ -96,7 +114,7 @@ public class HttpParamsToTask {
 		return params.containsKey("delete");
 	}
 
-	public void deleteReminderInDateBase(String user) {
-		dataBase.deleteReminder(createReminder(user, ""));
+	public void deleteReminderInDateBase(int id) {
+		dataBase.deleteReminder(id);
 	}
 }
