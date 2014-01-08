@@ -37,6 +37,7 @@ public class DataXMLManager {
 	public static String STATUS = "status";
 	public static String HADREPLYED = "hadReplyed";
 	public static String ANSWER = "answer";
+	public static String ID = "id";
 
 	private File tasksDataBase;
 	private Document tasksDoc;
@@ -100,9 +101,59 @@ public class DataXMLManager {
 
 	public void deleteTaskFromXML(Task taskToDelete) {
 		synchronized (tasksDoc) {
-			Node taskToDeleteAsNode = convertTaskToNode(taskToDelete);
-			tasksDoc.removeChild(taskToDeleteAsNode);
+			Node taskToDeleteAsNode = retriveTaskItemByID(taskToDelete.getId());
+			tasksDoc.getFirstChild().removeChild(taskToDeleteAsNode);
+
+			DOMSource source = new DOMSource(tasksDoc);
+			StreamResult result = new StreamResult(tasksDataBase);
+			try {
+				transformer.transform(source, result);
+			} catch (TransformerException e) {
+				e.printStackTrace();
+			}
 		}
+	}
+
+	public Node retrivePollItemByID(int id) {
+		Node poll = null;
+		NodeList polls = pollsDoc.getFirstChild().getChildNodes();
+
+		for (int i = 0; i < polls.getLength(); i++) {
+			if (Integer.parseInt(polls.item(i).getAttributes().getNamedItem(ID).getNodeValue()) == id) {
+				poll = polls.item(i);
+				break;
+			}
+		}
+
+		return poll;
+	}
+
+	public Node retriveTaskItemByID(int id) {
+		Node task = null;
+		NodeList tasks = tasksDoc.getFirstChild().getChildNodes();
+
+		for (int i = 0; i < tasks.getLength(); i++) {
+			if (Integer.parseInt(tasks.item(i).getAttributes().getNamedItem(ID).getNodeValue()) == id) {
+				task = tasks.item(i);
+				break;
+			}
+		}
+
+		return task;
+	}
+
+	public Node retriveReminderItemByID(int id) {
+		Node reminder = null;
+		NodeList reminders = reminderDoc.getFirstChild().getChildNodes();
+
+		for (int i = 0; i < reminders.getLength(); i++) {
+			if (Integer.parseInt(reminders.item(i).getAttributes().getNamedItem(ID).getNodeValue()) == id) {
+				reminder = reminders.item(i);
+				break;
+			}
+		}
+
+		return reminder;
 	}
 
 	private Node convertTaskToNode(Task task) {
@@ -117,6 +168,7 @@ public class DataXMLManager {
 		taskAsElement.setAttribute(ISCOMPLETED, isCompleted);
 		String taskExpiredHadBeenNotify = Boolean.toString(task.isTaskExpiredHadBeenNotify());
 		taskAsElement.setAttribute("taskExpiredHadBeenNotify", taskExpiredHadBeenNotify);
+		taskAsElement.setAttribute(ID, String.valueOf(task.getId()));
 
 		Element _content = tasksDoc.createElement(CONTENT);
 		_content.appendChild(tasksDoc.createTextNode(task.getContent()));
@@ -142,8 +194,16 @@ public class DataXMLManager {
 
 	public void deleteReminderFromXML(Reminder reminderToDelete) {
 		synchronized (reminderDoc) {
-			Node reminderToDeleteAsNode = convertReminderToNode(reminderToDelete);
-			reminderDoc.removeChild(reminderToDeleteAsNode);
+			Node reminderToDeleteAsNode = retriveReminderItemByID(reminderToDelete.getId());
+			reminderDoc.getFirstChild().removeChild(reminderToDeleteAsNode);
+
+			DOMSource source = new DOMSource(reminderDoc);
+			StreamResult result = new StreamResult(remindersDataBase);
+			try {
+				transformer.transform(source, result);
+			} catch (TransformerException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -156,6 +216,7 @@ public class DataXMLManager {
 		remainderAsElement.setAttribute(DateOfReminding,
 				new SimpleDateFormat(TIME_FORMAT).format(reminder.getDateOfReminding()));
 		remainderAsElement.setAttribute(HadBeenSend, Boolean.toString(reminder.isHadBeenSend()));
+		remainderAsElement.setAttribute(ID, String.valueOf(reminder.getId()));
 
 		Element _content = reminderDoc.createElement(CONTENT);
 		_content.appendChild(reminderDoc.createTextNode(reminder.getContent()));
@@ -181,8 +242,16 @@ public class DataXMLManager {
 
 	public void deletePollFromXML(Poll pollToDelete) {
 		synchronized (pollsDoc) {
-			Node pollToDeleteAsNode = convertPollToNode(pollToDelete);
-			pollsDoc.removeChild(pollToDeleteAsNode);
+			Node pollToDeleteAsNode = retrivePollItemByID(pollToDelete.getId());
+			pollsDoc.getFirstChild().removeChild(pollToDeleteAsNode);
+
+			DOMSource source = new DOMSource(pollsDoc);
+			StreamResult result = new StreamResult(pollsDataBase);
+			try {
+				transformer.transform(source, result);
+			} catch (TransformerException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -197,6 +266,8 @@ public class DataXMLManager {
 		pollAsElement.setAttribute(SUBJECT, poll.getSubject());
 		pollAsElement.setAttribute("question", poll.getQuestion());
 		pollAsElement.setAttribute(ISCOMPLETED, Boolean.toString(poll.isCompleted()));
+		pollAsElement.setAttribute("question", poll.getQuestion());
+		pollAsElement.setAttribute(ID, String.valueOf(poll.getId()));
 
 		// Answers part.
 		Element _answer;
@@ -263,9 +334,10 @@ public class DataXMLManager {
 		boolean isCompleted = Boolean.parseBoolean(att.getNamedItem(ISCOMPLETED).getNodeValue());
 		boolean taskExpiredHadBeenNotify = Boolean.parseBoolean(att.getNamedItem("taskExpiredHadBeenNotify")
 				.getNodeValue());
+		int id = Integer.parseInt(att.getNamedItem(ID).getNodeValue());
 
 		Task taskFromFile = new Task(taskCreator, title, dateOfCreation, dueDate, status, content, rcpt, isCompleted,
-				taskExpiredHadBeenNotify);
+				taskExpiredHadBeenNotify, id);
 
 		return taskFromFile;
 	}
@@ -301,8 +373,9 @@ public class DataXMLManager {
 
 		String content = item.getFirstChild().getTextContent();
 		boolean hadBeenSend = Boolean.parseBoolean(att.getNamedItem(HadBeenSend).getNodeValue());
+		int id = Integer.parseInt(att.getNamedItem(ID).getNodeValue());
 
-		Reminder reminderFromFile = new Reminder(user, title, dateOfCreation, dateOfReminding, content, hadBeenSend);
+		Reminder reminderFromFile = new Reminder(user, title, dateOfCreation, dateOfReminding, content, hadBeenSend, id);
 
 		return reminderFromFile;
 	}
@@ -327,6 +400,7 @@ public class DataXMLManager {
 		String user = att.getNamedItem(USER).getNodeValue();
 		String title = att.getNamedItem(TITLE).getNodeValue();
 		String dateOfCreationInString = att.getNamedItem(DATE).getNodeValue();
+		int id = Integer.parseInt(att.getNamedItem(ID).getNodeValue());
 
 		try {
 			dateOfCreation = new SimpleDateFormat(TIME_FORMAT).parse(dateOfCreationInString);
@@ -357,9 +431,71 @@ public class DataXMLManager {
 
 		}
 
-		Poll pollFromFile = new Poll(user, title, dateOfCreation, subject, question, answers, rcpts, isCompleted);
+		Poll pollFromFile = new Poll(user, title, dateOfCreation, subject, question, answers, rcpts, isCompleted, id);
 
 		return pollFromFile;
 	}
 
+	public void participantHadAnswerPoll(int pollID, String pollParticipantName) {
+
+		synchronized (pollsDoc) {
+
+			Node pollToChangeAsNode = retrivePollItemByID(pollID);
+			NodeList participants = pollToChangeAsNode.getLastChild().getChildNodes();
+			Element participantToBeChange = null;
+
+			for (int i = 0; i < participants.getLength(); i++) {
+				if (participants.item(i).getTextContent().equals(pollParticipantName)) {
+					participantToBeChange = (Element) participants.item(i);
+					break;
+				}
+			}
+
+			participantToBeChange.setAttribute(HADREPLYED, Boolean.toString(true));
+			DOMSource source = new DOMSource(pollsDoc);
+			StreamResult result = new StreamResult(pollsDataBase);
+
+			try {
+				transformer.transform(source, result);
+			} catch (TransformerException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	// public void taskTimeToCompleteHadExpired(int taskID) {
+	// synchronized (tasksDoc) {
+	//
+	// Element taskToBeChangeAsNode = (Element) retriveTaskItemByID(taskID);
+	// taskToBeChangeAsNode.setAttribute(, ANSWER);
+	//
+	//
+	// DOMSource source = new DOMSource(tasksDoc);
+	// StreamResult result = new StreamResult(tasksDataBase);
+	//
+	// try {
+	// transformer.transform(source, result);
+	// } catch (TransformerException e) {
+	// e.printStackTrace();
+	// }
+	// }
+	// }
+	//
+	// public void taskHadBeenCompleted(int taskID) {
+	// synchronized (tasksDoc) {
+	//
+	// Element taskToBeChangeAsNode = (Element) retriveTaskItemByID(taskID);
+	// taskToBeChangeAsNode.setAttribute(, ANSWER);
+	//
+	//
+	// DOMSource source = new DOMSource(tasksDoc);
+	// StreamResult result = new StreamResult(tasksDataBase);
+	//
+	// try {
+	// transformer.transform(source, result);
+	// } catch (TransformerException e) {
+	// e.printStackTrace();
+	// }
+	// }
+	// }
 }

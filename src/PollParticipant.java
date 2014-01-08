@@ -23,5 +23,4 @@ public class PollParticipant {
 	public void setHadAnswer(boolean hadAnswer) {
 		this.hadAnswer = hadAnswer;
 	}
-
 }

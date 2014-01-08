@@ -8,20 +8,32 @@ public class Reminder {
 	private String content;
 	private String title;
 	private boolean hadBeenSend;
+	private int id;
 
 	public Reminder(String user, String title, Date dateOfCreation, Date dateOfReminding, String content,
-			boolean hadBeenSend) {
+			boolean hadBeenSend, int id) {
 		this.user = user;
 		this.dateOfCreation = dateOfCreation;
 		this.dateOfReminding = dateOfReminding;
 		this.content = content;
 		this.title = title;
 		this.hadBeenSend = hadBeenSend;
+		this.id = id;
+	}
+
+	public Reminder(Reminder reminder) {
+		this.user = reminder.user;
+		this.dateOfCreation = reminder.dateOfCreation;
+		this.dateOfReminding = reminder.dateOfReminding;
+		this.content = reminder.content;
+		this.title = reminder.title;
+		this.hadBeenSend = reminder.hadBeenSend;
 	}
 
 	public void sendReminder() {
 		SMTPMail.sendSMTPMail(user, user, title, user, content);
 		this.hadBeenSend = true;
+
 	}
 
 	public String getUser() {
@@ -78,5 +90,13 @@ public class Reminder {
 
 	public void setHadBeenSend(boolean hadBeenSend) {
 		this.hadBeenSend = hadBeenSend;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 }

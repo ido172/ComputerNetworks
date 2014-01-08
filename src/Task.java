@@ -12,9 +12,10 @@ public class Task {
 	private String rcpt;
 	private boolean isCompleted;
 	private boolean taskExpiredHadBeenNotify;
+	private int id;
 
 	public Task(String taskCreator, String title, Date dateOfCreation, Date dueDate, String status, String content,
-			String rcpt, boolean isCompleted, boolean taskExpiredHadBeenNotify) {
+			String rcpt, boolean isCompleted, boolean taskExpiredHadBeenNotify, int id) {
 		this.taskCreator = taskCreator;
 		this.title = title;
 		this.dateOfCreation = dateOfCreation;
@@ -24,14 +25,31 @@ public class Task {
 		this.rcpt = rcpt;
 		this.isCompleted = isCompleted;
 		this.taskExpiredHadBeenNotify = taskExpiredHadBeenNotify;
+		this.id = id;
+		handleNewTask();
+	}
+
+	public void taskHadBeenCompleted() {
+		// //????????
+		isCompleted = true;
+		SMTPMail.sendSMTPMail(rcpt, taskCreator, "Task had been completed", rcpt, "The task:\n\n" + content
+				+ "\nHad been completed");
 	}
 
 	public void handleExpiredTask() {
+
 		SMTPMail.sendSMTPMail(taskCreator, taskCreator, ExpiredTaskMassage, taskCreator,
 				"This is the task that her time had expired:\n" + content);
+
 		SMTPMail.sendSMTPMail(taskCreator, rcpt, ExpiredTaskMassage, taskCreator,
 				"This is the task that her time had expired:\n" + content);
+		taskExpiredHadBeenNotify = true;
+	}
 
+	public void handleNewTask() {
+
+		SMTPMail.sendSMTPMail(taskCreator, rcpt, title, taskCreator, "New task:\n" + "link\n" + content + "\n"
+				+ "Task status: " + status + ".");
 	}
 
 	public String getContent() {
@@ -112,5 +130,13 @@ public class Task {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 }

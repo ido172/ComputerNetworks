@@ -1,36 +1,61 @@
 import java.util.Date;
 import java.util.LinkedList;
 
+import org.w3c.dom.Node;
+
 public class DataBase {
+
 	private LinkedList<Task> taskList;
 	private LinkedList<Reminder> reminderList;
 	private LinkedList<Poll> pollList;
 	private DataScheduler seheduler;
 	private DataXMLManager dataXMLManager;
+	private IDCounter iDCounter;
 
 	public DataBase() {
 		taskList = new LinkedList<Task>();
 		reminderList = new LinkedList<Reminder>();
 		pollList = new LinkedList<Poll>();
+		dataXMLManager = new DataXMLManager();
+		taskList = dataXMLManager.retrieveTasks();
+		reminderList = dataXMLManager.retrieveReminders();
+		pollList = dataXMLManager.retrievePolls();
 		seheduler = new DataScheduler(this);
 		seheduler.runDataScheduler();
-		dataXMLManager = new DataXMLManager();
+		iDCounter = new IDCounter();
 	}
 
 	public void checkItemsAndHandleThem() {
 		synchronized (taskList) {
 			for (Task task : taskList) {
-				if ((task.getDueDate().after(new Date())) && (task.isCompleted() == false)
-						&& (task.isTaskExpiredHadBeenNotify() == false)) {
+				if ((task.getDueDate().before(new Date()) || (task.getDueDate().equals(new Date())))
+						&& !task.isCompleted() && !task.isTaskExpiredHadBeenNotify()) {
+
 					task.handleExpiredTask();
+					// Task temp = task;
+					// // this.dataXMLManager.deleteTaskFromXML(task);
+					// // this.getTaskList().remove(task);
+					// temp.handleExpiredTask();
+					// this.addTask(temp);
 				}
 			}
 		}
 
 		synchronized (reminderList) {
 			for (Reminder reminder : reminderList) {
-				if (reminder.getDateOfReminding().after(new Date()) && (!reminder.isHadBeenSend())) {
-					reminder.sendReminder();
+				if ((reminder.getDateOfReminding().before(new Date()) || (reminder.getDateOfReminding()
+						.equals(new Date()))) && !reminder.isHadBeenSend()) {
+
+					Reminder temp = new Reminder(reminder);
+					reminderList.remove(reminder);
+
+					System.out.println("fedsjv11111111111111");
+					this.dataXMLManager.deleteReminderFromXML(reminder);
+					System.out.println("fedsjv2222222222222");
+					;
+					temp.sendReminder();
+					this.addReminder(temp);
+					System.out.println("fedsjv");
 				}
 			}
 		}
@@ -159,9 +184,7 @@ public class DataBase {
 	}
 
 	public LinkedList<Reminder> getReminderList() {
-		synchronized (reminderList) {
-			return reminderList;
-		}
+		return reminderList;
 	}
 
 	public void setReminderList(LinkedList<Reminder> reminderList) {
@@ -193,4 +216,41 @@ public class DataBase {
 	public void setDataXMLManager(DataXMLManager dataXMLManager) {
 		this.dataXMLManager = dataXMLManager;
 	}
+
+	public IDCounter getiDCounter() {
+		return iDCounter;
+	}
+
+	public void setiDCounter(IDCounter iDCounter) {
+		this.iDCounter = iDCounter;
+	}
+
+	public Poll retrivePollByID(int id) {
+		Poll returndPoll = null;
+
+		synchronized (pollList) {
+			for (Poll _poll : pollList) {
+				if (_poll.getId() == id) {
+					returndPoll = _poll;
+					break;
+				}
+			}
+		}
+
+		return returndPoll;
+	}
+
+	public void participantHadAnswerPoll(int pollID, String pollParticipantName) {
+
+		Poll poll = retrivePollByID(pollID);
+		Poll oldPoll = poll.duplicatePoll();
+		poll.participantHadAnswer(pollParticipantName);
+
+		dataXMLManager.deletePollFromXML(oldPoll);
+		dataXMLManager.addPoll(poll);
+	}
+
+	// public Poll retrivePollID(int id) {}
+	// public Task retriveTaskByID(int id) {}
+	// public Reminder retriveReminderByID(int id) {}
 }

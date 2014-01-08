@@ -11,9 +11,10 @@ public class Poll {
 	private LinkedList<String> answers;
 	private LinkedList<PollParticipant> rcpts;
 	private boolean isCompleted;
+	private int id;
 
 	public Poll(String pollCreator, String title, Date dateOfCreation, String subject, String question,
-			LinkedList<String> answers, LinkedList<PollParticipant> rcpts, boolean isCompleted) {
+			LinkedList<String> answers, LinkedList<PollParticipant> rcpts, boolean isCompleted, int id) {
 		this.pollCreator = pollCreator;
 		this.title = title;
 		this.dateOfCreation = dateOfCreation;
@@ -22,6 +23,11 @@ public class Poll {
 		this.answers = answers;
 		this.rcpts = rcpts;
 		this.isCompleted = isCompleted;
+		this.id = id;
+	}
+
+	public Poll duplicatePoll() {
+		return new Poll(pollCreator, title, dateOfCreation, subject, question, answers, rcpts, isCompleted, id);
 	}
 
 	public void handleNewPoll() {
@@ -99,4 +105,20 @@ public class Poll {
 		this.isCompleted = isCompleted;
 	}
 
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public void participantHadAnswer(String pollParticipantName) {
+		for (PollParticipant participant : getRcpts()) {
+			if (participant.getUserName().equals(pollParticipantName)) {
+				participant.setHadAnswer(true);
+				break;
+			}
+		}
+	}
 }
