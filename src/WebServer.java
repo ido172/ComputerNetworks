@@ -138,10 +138,10 @@ public class WebServer {
 		boolean taskExpiredHadBeenNotify = false;
 
 		Task task = new Task(pollCreator, title, dateOfCreation, dateOfCreation, "status", "content", rcpt,
-				isCompleted, taskExpiredHadBeenNotify, dataBase.getiDCounter().getCounterAndIncreaseByOne());
+				isCompleted, taskExpiredHadBeenNotify, dataBase.getIDCounter().getCounterAndIncreaseByOne());
 
 		Reminder reminder = new Reminder(pollCreator, title2, dateOfCreation, dateOfCreation, "content", false,
-				dataBase.getiDCounter().getCounterAndIncreaseByOne());
+				dataBase.getIDCounter().getCounterAndIncreaseByOne());
 		dataBase.addTask(task);
 		dataBase.addReminder(reminder);
 		String gg = "I Love U more then anything!!!!!";

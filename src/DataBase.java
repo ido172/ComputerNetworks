@@ -1,8 +1,6 @@
 import java.util.Date;
 import java.util.LinkedList;
 
-import org.w3c.dom.Node;
-
 public class DataBase {
 
 	private LinkedList<Task> taskList;
@@ -126,6 +124,24 @@ public class DataBase {
 		dataXMLManager.addTask(newTask);
 	}
 
+	public void closeTask(int id){
+		Task completedTask = retriveTaskByID(id);
+		dataXMLManager.deleteTaskFromXML(completedTask);
+		completedTask.taskHadBeenCompleted();
+		dataXMLManager.addTask(completedTask);
+		
+	}
+	
+	public void editTask(int oldFormatTaskId, Task newFormatTask) {
+
+		Task oldTask = retriveTaskByID(oldFormatTaskId);
+		taskList.remove(oldTask);
+		taskList.add(newFormatTask);
+
+		dataXMLManager.deleteTaskFromXML(oldTask);
+		dataXMLManager.addTask(newFormatTask);
+	}
+	
 	public void addReminder(Reminder newReminder) {
 		synchronized (reminderList) {
 			reminderList.add(newReminder);
@@ -140,6 +156,17 @@ public class DataBase {
 		dataXMLManager.deleteReminderFromXML(reminderToDelete);
 	}
 
+	public void deleteReminder(int reminderToDeleteID) {
+		
+		Reminder reminderToDelete = null;
+		
+		synchronized (reminderList) {
+			reminderToDelete = retriveReminderByID(reminderToDeleteID);
+			reminderList.remove(reminderToDelete);
+		}
+		dataXMLManager.deleteReminderFromXML(reminderToDelete);
+	}
+	
 	public void editReminder(Reminder newReminder, Reminder oldReminder) {
 
 		reminderList.remove(oldReminder);
@@ -147,6 +174,16 @@ public class DataBase {
 
 		dataXMLManager.deleteReminderFromXML(oldReminder);
 		dataXMLManager.addReminder(newReminder);
+	}
+
+	public void editReminder(int oldFormatReminderId, Reminder newFormatReminder) {
+		
+		Reminder oldReminder = retriveReminderByID(oldFormatReminderId);
+		reminderList.remove(oldReminder);
+		reminderList.add(newFormatReminder);
+
+		dataXMLManager.deleteReminderFromXML(oldReminder);
+		dataXMLManager.addReminder(newFormatReminder);
 	}
 
 	public synchronized void addPoll(Poll newPoll) {
@@ -217,10 +254,6 @@ public class DataBase {
 		this.dataXMLManager = dataXMLManager;
 	}
 
-	public IDCounter getiDCounter() {
-		return iDCounter;
-	}
-
 	public void setiDCounter(IDCounter iDCounter) {
 		this.iDCounter = iDCounter;
 	}
@@ -240,6 +273,36 @@ public class DataBase {
 		return returndPoll;
 	}
 
+	public Reminder retriveReminderByID(int id) {
+		Reminder returndReminder = null;
+
+		synchronized (reminderList) {
+			for (Reminder _reminder : reminderList) {
+				if (_reminder.getId() == id) {
+					returndReminder = _reminder;
+					break;
+				}
+			}
+		}
+
+		return returndReminder;
+	}
+
+	public Task retriveTaskByID(int id) {
+		Task returndTask = null;
+
+		synchronized (taskList) {
+			for (Task _task : taskList) {
+				if (_task.getId() == id) {
+					returndTask = _task;
+					break;
+				}
+			}
+		}
+
+		return returndTask;
+	}
+
 	public void participantHadAnswerPoll(int pollID, String pollParticipantName) {
 
 		Poll poll = retrivePollByID(pollID);
@@ -249,8 +312,8 @@ public class DataBase {
 		dataXMLManager.deletePollFromXML(oldPoll);
 		dataXMLManager.addPoll(poll);
 	}
-
-	// public Poll retrivePollID(int id) {}
-	// public Task retriveTaskByID(int id) {}
-	// public Reminder retriveReminderByID(int id) {}
+	
+	public int getNewID(){
+		return iDCounter.getCounterAndIncreaseByOne();
+	}
 }

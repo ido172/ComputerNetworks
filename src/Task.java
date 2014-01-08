@@ -1,7 +1,10 @@
 import java.util.Date;
 
 public class Task {
-
+	public static final String Time_Is_Due = "time is due";
+	public static final String Completed = "completed";
+	public static final String In_Progress = "in progress";
+	
 	public static String ExpiredTaskMassage = "The time to complete this task had expired.";
 	private String taskCreator;
 	private String title;
@@ -47,11 +50,11 @@ public class Task {
 	}
 
 	public void handleNewTask() {
-
-		SMTPMail.sendSMTPMail(taskCreator, rcpt, title, taskCreator, "New task:\n" + "link\n" + content + "\n"
-				+ "Task status: " + status + ".");
+		
+		String link = "<a href='" +ConfigFile.ServerName + "/task_reply.html?id=" + getId() + "' >Mark as Completed</a>";
+		SMTPMail.sendSMTPMail(taskCreator, rcpt, "Task: " + title, taskCreator, getContent() + "\n" + link);
 	}
-
+	
 	public String getContent() {
 		return content;
 	}
@@ -138,5 +141,11 @@ public class Task {
 
 	public void setId(int id) {
 		this.id = id;
+	}
+	
+	public void taskHadBeenClosed() {
+		setCompleted(true);	
+		setStatus(Task.Completed);
+		SMTPMail.sendSMTPMail(rcpt, taskCreator, "Task completion", rcpt, "The task had been completed");
 	}
 }
