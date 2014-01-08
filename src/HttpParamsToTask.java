@@ -88,8 +88,6 @@ public class HttpParamsToTask {
 		}
 	}
 	
-
-	
 	public boolean isEditRequest() {
 		return params.containsKey("edit") && params.get("edit").equals("true");
 	}
