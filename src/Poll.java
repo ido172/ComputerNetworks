@@ -22,30 +22,30 @@ public class Poll {
 		this.rcpts = rcpts;
 		this.isCompleted = isCompleted;
 		this.id = id;
-		handleNewPoll();
 	}
 
-	public void handleNewPoll() {
+	public void sendMailsToParticipants() {
 
 		String link = "";
 
 		for (int i = 0; i < getRcpts().size(); i++) {
 
-			StringBuilder data = new StringBuilder();
-			data.append(question);
-			data.append(SMTPMail.CRLF);
-
+			StringBuilder mailContent = new StringBuilder();
+			mailContent.append(question);
+			mailContent.append(SMTPMail.CRLF);
+			// data.append("<html><body>");
 			for (int j = 0; j < answers.size(); j++) {
 
 				link = "<a href='" + ConfigFile.ServerName + "/poll_reply.html?id=" + getId() + "&answer=" + j
 						+ "&rcpt=" + i + "' >" + answers.get(j) + "</a>";
 
-				data.append(question + SMTPMail.CRLF);
-				data.append(link);
+				mailContent.append(link);
 			}
 
+			// data.append("</body></html>");
+
 			SMTPMail.sendSMTPMail(pollCreator, rcpts.get(i).getUserName(), "Poll" + subject, pollCreator,
-					data.toString());
+					mailContent.toString());
 		}
 	}
 

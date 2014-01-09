@@ -29,25 +29,36 @@ public class Task {
 		this.isCompleted = isCompleted;
 		this.taskExpiredHadBeenNotify = taskExpiredHadBeenNotify;
 		this.id = id;
-		handleNewTask();
 	}
 
 	public void taskHadBeenCompleted() {
-		// //????????
 		isCompleted = true;
-		SMTPMail.sendSMTPMail(rcpt, taskCreator, "Task had been completed", rcpt, "The task:\n\n" + content
-				+ "\nHad been completed");
+		StringBuilder mailContent = new StringBuilder();
+		mailContent.append("The task:\n\n");
+		mailContent.append(content);
+		mailContent.append("\nHad been completed");
+
+		SMTPMail.sendSMTPMail(rcpt, taskCreator, "Task had been completed", rcpt, mailContent.toString());
 	}
 
 	public void handleExpiredTask() {
-
-		SMTPMail.sendSMTPMail(taskCreator, taskCreator, ExpiredTaskMassage, taskCreator, "The task: " + title
-				+ " hadn't been completed on time.");
-
-		SMTPMail.sendSMTPMail(taskCreator, rcpt, ExpiredTaskMassage, taskCreator,
-				"You had falied to complete the task: " + title + " on time.");
 		taskExpiredHadBeenNotify = true;
 		status = Time_Is_Due;
+
+		StringBuilder mailContentTaskCreator = new StringBuilder();
+		mailContentTaskCreator.append("The task: ");
+		mailContentTaskCreator.append(title);
+		mailContentTaskCreator.append(" hadn't been completed on time");
+
+		SMTPMail.sendSMTPMail(taskCreator, taskCreator, ExpiredTaskMassage, taskCreator,
+				mailContentTaskCreator.toString());
+
+		StringBuilder mailContentTaskRcpt = new StringBuilder();
+		mailContentTaskRcpt.append("You had falied to complete the task: ");
+		mailContentTaskRcpt.append(title);
+		mailContentTaskRcpt.append(" on time");
+
+		SMTPMail.sendSMTPMail(taskCreator, rcpt, ExpiredTaskMassage, taskCreator, mailContentTaskRcpt.toString());
 	}
 
 	public void handleNewTask() {

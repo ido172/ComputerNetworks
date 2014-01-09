@@ -31,7 +31,7 @@ public class Reminder {
 	}
 
 	public void sendReminder() {
-		SMTPMail.sendSMTPMail(user, user, title, user, content);
+		SMTPMail.sendSMTPMail(user, user, "Reminder - " + title, user, content);
 		this.hadBeenSend = true;
 
 	}

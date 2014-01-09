@@ -14,14 +14,8 @@ public class WebServer {
 	private String defaultPage;
 	private int maxThreads;
 	private DataBase dataBase;
-
 	private ThreadPool threadPool;
 
-	/**
-	 * Read parameters from configuration file.
-	 * 
-	 * @return true if read was successful or false otherwise
-	 */
 	private boolean readConfogFile() {
 		boolean result = false;
 		try {
@@ -53,9 +47,10 @@ public class WebServer {
 		// If read configuration file is successful start server.
 		if (readConfogFile()) {
 			dataBase = new DataBase();
+
 			ServerSocket socket;
 
-			// ////////////////////////////////////???????????????????
+			// /////////////////////////////////////???????????????????
 			test();
 			// ////////////////////////////////////???????????????????
 			try {
@@ -112,12 +107,12 @@ public class WebServer {
 
 	private void test() {
 		String pollCreator = "shaybozo@gmail.com";
-		String title = "Task - you need to be my bitch";
-		Date dateOfCreation = new Date();
-		//String subject = "subject";
-		//String question = "Who is my bitch?????";
-		String rcpt = "uri.steinf@gmail.com";
-		String title2 = "Reminder - you are my bitch";
+		String subject = "Bitches";
+		//Date dateOfCreation = new Date();
+		// String subject = "subject";
+		String question = "Who is my bitch?????";
+//		String rcpt = "uri.steinf@gmail.com";
+//		String title2 = "Reminder - you are my bitch";
 
 		LinkedList<String> answers = new LinkedList<String>();
 		answers.add("ido");
@@ -126,38 +121,38 @@ public class WebServer {
 		answers.add("ofer");
 
 		PollParticipant ido = new PollParticipant("ido172@gmail.com", false);
-		PollParticipant uri = new PollParticipant("Uri S <uri.steinf@gmail.com>", false);
-		PollParticipant reuven = new PollParticipant("Reuven Eliyahu <ruvene@gmail.com>", false);
-		PollParticipant ofer = new PollParticipant("oferbennoon@gmail.com", false);
+		PollParticipant uri = new PollParticipant("ido172@gmail.com", false);
+		PollParticipant reuven = new PollParticipant("shaybozo@gmail.com", false);
+		PollParticipant ofer = new PollParticipant("shaybozo@gmail.com", false);
 		LinkedList<PollParticipant> rcpts = new LinkedList<PollParticipant>();
 		rcpts.add(ofer);
 		rcpts.add(ido);
 		rcpts.add(uri);
 		rcpts.add(reuven);
+
 		boolean isCompleted = false;
-		boolean taskExpiredHadBeenNotify = false;
+		//boolean taskExpiredHadBeenNotify = false;
+		// String pollCreator, Date dateOfCreation, String subject, String question, LinkedList<String> answers,
+		// LinkedList<PollParticipant> rcpts, boolean isCompleted, int id
 
-		Task task = new Task(pollCreator, title, dateOfCreation, dateOfCreation, "status", "content", rcpt,
-				isCompleted, taskExpiredHadBeenNotify, dataBase.getNewID());
-
-		Reminder reminder = new Reminder(pollCreator, title2, dateOfCreation, dateOfCreation, "content", false,
+		Poll newPoll = new Poll(pollCreator, new Date(), subject, question, answers, rcpts, isCompleted,
 				dataBase.getNewID());
-		dataBase.addTask(task);
-		dataBase.addReminder(reminder);
-		
-		dataBase.addReminder(reminder);
-		dataBase.addReminder(reminder);
-		dataBase.addReminder(reminder);
-		// LinkedList<Reminder> reminder1 = dataBase.retrieveReminders();
-		// LinkedList<Poll> polls = dataBase.retrievePolls();
-		System.out.println("colllllll");
+		dataBase.addPoll(newPoll);
 
-		// for (int i = 0; i < 10; i++) {
-		//
-		// SMTPMail.sendSMTPMail(pollCreator, "noakochav94@gmail.com", gg, "Shay", "");
-		// //SMTPMail.sendSMTPMail(pollCreator, rcpt, title, "Shay (The Man) Bozo", "lalala");
-		//
-		// }
+		// Task(String taskCreator, String title, Date dateOfCreation, Date dueDate, String status, String content,
+		// String rcpt, boolean isCompleted, boolean taskExpiredHadBeenNotify, int id) {
+
+		// Task task = new Task(pollCreator, "new task", dateOfCreation, dateOfCreation, Task.In_Progress, "content",
+		// rcpt
+		// , isCompleted, taskExpiredHadBeenNotify, dataBase.getNewID());
+
+		// Reminder reminder = new Reminder(pollCreator, title2, dateOfCreation, dateOfCreation, "content", false,
+		// dataBase.getNewID());
+
+		// dataBase.addTask(task);
+		// dataBase.addReminder(reminder);
+
+		dataBase.participantHadAnswerPoll(1, 1, 3);
+		System.out.println("end of testTTTTTTTTTTTTTTTT");
 	}
-
 }
