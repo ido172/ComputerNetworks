@@ -20,6 +20,8 @@ public class HttpHeaders {
 
 	public static final String CONTENT_TYPE_MESSAGE = "message/http";
 	public static final String CONTENT_TYPE_HTML = "text/html";
+	public static final String CONTENT_TYPE_CSS = "text/css";
+	public static final String CONTENT_TYPE_JS = "application/javascript";
 	public static final String CONTENT_TYPE_IMAGE = "image";
 	public static final String CONTENT_TYPE_ICON = "icon";
 	public static final String CONTENT_TYPE_APP = "application/octet-stream";
