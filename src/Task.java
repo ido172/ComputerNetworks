@@ -5,7 +5,7 @@ public class Task {
 	public static final String Completed = "completed";
 	public static final String In_Progress = "in progress";
 
-	public static String ExpiredTaskMassage = "The time to complete this task had expired.";
+	public static String ExpiredTaskMassage = "Expired Task";
 	private String taskCreator;
 	private String title;
 	private Date dateOfCreation;
@@ -41,12 +41,13 @@ public class Task {
 
 	public void handleExpiredTask() {
 
-		SMTPMail.sendSMTPMail(taskCreator, taskCreator, ExpiredTaskMassage, taskCreator,
-				"This is the task that her time had expired:\n" + content);
+		SMTPMail.sendSMTPMail(taskCreator, taskCreator, ExpiredTaskMassage, taskCreator, "The task: " + title
+				+ " hadn't been completed on time.");
 
 		SMTPMail.sendSMTPMail(taskCreator, rcpt, ExpiredTaskMassage, taskCreator,
-				"This is the task that her time had expired:\n" + content);
+				"You had falied to complete the task: " + title + " on time.");
 		taskExpiredHadBeenNotify = true;
+		status = Time_Is_Due;
 	}
 
 	public void handleNewTask() {

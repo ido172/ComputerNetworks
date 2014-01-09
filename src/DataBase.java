@@ -28,13 +28,10 @@ public class DataBase {
 			for (Task task : taskList) {
 				if ((task.getDueDate().before(new Date()) || (task.getDueDate().equals(new Date())))
 						&& !task.isCompleted() && !task.isTaskExpiredHadBeenNotify()) {
-
+					
+					dataXMLManager.deleteTaskFromXML(task);
 					task.handleExpiredTask();
-					// Task temp = task;
-					// // this.dataXMLManager.deleteTaskFromXML(task);
-					// // this.getTaskList().remove(task);
-					// temp.handleExpiredTask();
-					// this.addTask(temp);
+					dataXMLManager.addTask(task);
 				}
 			}
 		}
@@ -44,16 +41,9 @@ public class DataBase {
 				if ((reminder.getDateOfReminding().before(new Date()) || (reminder.getDateOfReminding()
 						.equals(new Date()))) && !reminder.isHadBeenSend()) {
 
-					Reminder temp = new Reminder(reminder);
-					reminderList.remove(reminder);
-
-					System.out.println("fedsjv11111111111111");
-					this.dataXMLManager.deleteReminderFromXML(reminder);
-					System.out.println("fedsjv2222222222222");
-					;
-					temp.sendReminder();
-					this.addReminder(temp);
-					System.out.println("fedsjv");
+					dataXMLManager.deleteReminderFromXML(reminder);
+					reminder.sendReminder();
+					dataXMLManager.addReminder(reminder);
 				}
 			}
 		}
@@ -316,7 +306,7 @@ public class DataBase {
 
 		Poll poll = retrivePollByID(pollID);
 		Poll oldPoll = poll.duplicatePoll();
-		poll.participantHadAnswer(pollParticipantName);
+		poll.participantHadAnswer(int participantIndex, int answerIndex);
 
 		dataXMLManager.deletePollFromXML(oldPoll);
 		dataXMLManager.addPoll(poll);

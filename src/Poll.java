@@ -7,7 +7,7 @@ public class Poll {
 	private String title;
 	private Date dateOfCreation;
 	private String subject;
-	private String question; // Content
+	private String question;
 	private LinkedList<String> answers;
 	private LinkedList<PollParticipant> rcpts;
 	private boolean isCompleted;
@@ -24,6 +24,7 @@ public class Poll {
 		this.rcpts = rcpts;
 		this.isCompleted = isCompleted;
 		this.id = id;
+		handleNewPoll();
 	}
 
 	public Poll duplicatePoll() {
@@ -31,13 +32,26 @@ public class Poll {
 	}
 
 	public void handleNewPoll() {
-		for (PollParticipant rcpt : rcpts) {
-			StringBuilder data = new StringBuilder();
-			data.append(question + SMTPMail.CRLF);
-			data.append("<a href=\"polls_reply.html?user=" + pollCreator + "&date=" + dateOfCreation.toString()
-					+ "&question=" + question + "\">Link to poll</a>");
 
-			SMTPMail.sendSMTPMail(pollCreator, rcpt.getUserName(), "Poll" + subject, pollCreator, data.toString());
+		String link = "";
+
+		for (int i = 0; i < getRcpts().size(); i++) {
+
+			StringBuilder data = new StringBuilder();
+			data.append(question);
+			data.append(SMTPMail.CRLF);
+
+			for (int j = 0; j < answers.size(); j++) {
+
+				link = "<a href='" + ConfigFile.ServerName + "/poll_reply.html?id=" + getId() + "&answer=" + j
+						+ "&rcpt=" + i + "' >" + answers.get(j) + "</a>";
+
+				data.append(question + SMTPMail.CRLF);
+				data.append(link);
+			}
+
+			SMTPMail.sendSMTPMail(pollCreator, rcpts.get(i).getUserName(), "Poll" + subject, pollCreator,
+					data.toString());
 		}
 	}
 
@@ -113,12 +127,32 @@ public class Poll {
 		this.id = id;
 	}
 
-	public void participantHadAnswer(String pollParticipantName) {
+	public void participantHadAnswer(int participantIndex, int answerIndex) { // // what about if the poll is completed?
+		getAnswers().get(answerIndex);
+		PollParticipant currParticipant = getRcpts().get(participantIndex);
+		currParticipant.setHadAnswer(true);
+		checkIfPollIsCompleted();
+		StringBuilder data = new StringBuilder();
+		data.append("The status of the poll:\n");
+
 		for (PollParticipant participant : getRcpts()) {
-			if (participant.getUserName().equals(pollParticipantName)) {
-				participant.setHadAnswer(true);
-				break;
+			data.append("The participant: ");
+			data.append(participant.getUserName());
+
+			if (participant.isHadAnswer()) {
+				data.append(" had answer the poll.");
+			} else {
+				data.append(" hadn't yet answer the poll.");
 			}
+
+			data.append("\n");
 		}
+
+		SMTPMail.sendSMTPMail(pollCreator, currParticipant.getUserName(), "Poll: " + subject, pollCreator, "");
+	}
+
+	private void checkIfPollIsCompleted() {
+		// TODO Auto-generated method stub
+
 	}
 }
