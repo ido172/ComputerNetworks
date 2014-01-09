@@ -32,40 +32,50 @@ public class Task {
 	}
 
 	public void taskHadBeenCompleted() {
+		//TODO
 		isCompleted = true;
 		StringBuilder mailContent = new StringBuilder();
-		mailContent.append("The task:\n\n");
+		mailContent.append("The task:");
+		mailContent.append(SMTPMail.CRLF);
 		mailContent.append(content);
-		mailContent.append("\nHad been completed");
+		mailContent.append(SMTPMail.CRLF + "Had been completed");
 
 		SMTPMail.sendSMTPMail(rcpt, taskCreator, "Task had been completed", rcpt, mailContent.toString());
 	}
 
 	public void handleExpiredTask() {
+		// TODO
 		taskExpiredHadBeenNotify = true;
 		status = Time_Is_Due;
 
 		StringBuilder mailContentTaskCreator = new StringBuilder();
-		mailContentTaskCreator.append("The task: ");
+		mailContentTaskCreator.append("Thetask:");
 		mailContentTaskCreator.append(title);
-		mailContentTaskCreator.append(" hadn't been completed on time");
+		mailContentTaskCreator.append("hadnt been completed on time.");
 
 		SMTPMail.sendSMTPMail(taskCreator, taskCreator, ExpiredTaskMassage, taskCreator,
 				mailContentTaskCreator.toString());
+		// mailContentTaskCreator.toString());
 
 		StringBuilder mailContentTaskRcpt = new StringBuilder();
 		mailContentTaskRcpt.append("You had falied to complete the task: ");
 		mailContentTaskRcpt.append(title);
 		mailContentTaskRcpt.append(" on time");
-
 		SMTPMail.sendSMTPMail(taskCreator, rcpt, ExpiredTaskMassage, taskCreator, mailContentTaskRcpt.toString());
 	}
 
 	public void handleNewTask() {
+		// TODO
+		StringBuilder mailContent = new StringBuilder();
+		mailContent.append("To mark the task: ");
+		mailContent.append(title);
+		mailContent.append(" as completed press this link: http://");
+		mailContent.append(ConfigFile.ServerName);
+		mailContent.append("/task_reply.html?id=");
+		mailContent.append(getId());
 
-		String link = "<a href='" + ConfigFile.ServerName + "/task_reply.html?id=" + getId()
-				+ "' >Mark as Completed</a>";
-		SMTPMail.sendSMTPMail(taskCreator, rcpt, "Task: " + title, taskCreator, getContent() + "\n" + link);
+		String subject = "Task: " + title;
+		SMTPMail.sendSMTPMail(taskCreator, rcpt, subject, taskCreator, mailContent.toString());
 	}
 
 	public String getContent() {

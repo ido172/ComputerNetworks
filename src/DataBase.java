@@ -28,7 +28,7 @@ public class DataBase {
 			for (Task task : taskList) {
 				if ((task.getDueDate().before(new Date()) || (task.getDueDate().equals(new Date())))
 						&& !task.isCompleted() && !task.isTaskExpiredHadBeenNotify()) {
-					
+
 					dataXMLManager.deleteTaskFromXML(task);
 					task.handleExpiredTask();
 					dataXMLManager.addTask(task);
@@ -155,7 +155,7 @@ public class DataBase {
 		dataXMLManager.deleteReminderFromXML(reminderToDelete);
 	}
 
-	public void deleteReminder(int reminderToDeleteID) {
+	public void deleteReminderById(int reminderToDeleteID) {
 
 		Reminder reminderToDelete = null;
 
@@ -164,6 +164,17 @@ public class DataBase {
 			reminderList.remove(reminderToDelete);
 		}
 		dataXMLManager.deleteReminderFromXML(reminderToDelete);
+	}
+
+	public void deletePollByID(int pollToDeleteID) {
+
+		Poll pollToDelete = null;
+
+		synchronized (pollList) {
+			pollToDelete = retrivePollByID(pollToDeleteID);
+			pollList.remove(pollToDelete);
+		}
+		dataXMLManager.deletePollFromXML(pollToDelete);
 	}
 
 	public void editReminder(Reminder newReminder, Reminder oldReminder) {

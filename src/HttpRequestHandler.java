@@ -41,6 +41,7 @@ final class HttpRequestHandler implements Runnable {
 		this.root = (root.charAt(root.length() - 1) == '\\') ? root : root + '\\';
 		this.defaultPage = defaultPage;
 		this.dataBase = dataBase;
+		httpResponseMaker = new HttpResponseMaker(this);
 	}
 
 	private void initRequestFlags() {
@@ -146,8 +147,7 @@ final class HttpRequestHandler implements Runnable {
 			// Get request parameters and request as string.
 			httpRequestParams = requestParser.getParametersMap();
 			request = requestParser.getRequest();
-			httpResponseMaker = new HttpResponseMaker(this);
-			
+
 			// Print request to console
 			System.out.println(request);
 

@@ -32,58 +32,52 @@ public class Poll {
 
 			StringBuilder mailContent = new StringBuilder();
 			mailContent.append(question);
-			mailContent.append(SMTPMail.CRLF);
-			// data.append("<html><body>");
+
 			for (int j = 0; j < answers.size(); j++) {
 
-				link = "<a href='" + ConfigFile.ServerName + "/poll_reply.html?id=" + getId() + "&answer=" + j
-						+ "&rcpt=" + i + "' >" + answers.get(j) + "</a>";
+				link = "click on http://" + ConfigFile.ServerName + "/poll_reply.html?id=" + getId() + "&answer=" + j
+						+ "&rcpt=" + i + " for the answer: " + answers.get(j);
 
 				mailContent.append(link);
+				mailContent.append(SMTPMail.CRLF);
 			}
 
-			// data.append("</body></html>");
-
-			SMTPMail.sendSMTPMail(pollCreator, rcpts.get(i).getUserName(), "Poll" + subject, pollCreator,
+			SMTPMail.sendSMTPMail(pollCreator, rcpts.get(i).getUserName(), "Poll: " + subject, pollCreator,
 					mailContent.toString());
 		}
 	}
 
 	public void participantHadAnswer(int participantIndex, int answerIndex) {
+		// TODO
 		String answer = getAnswers().get(answerIndex);
 		PollParticipant currParticipant = getRcpts().get(participantIndex);
+		currParticipant.setParticipantReplay(answer);
 		currParticipant.setHadAnswer(true);
 		boolean pollHadBeenCompleted = checkIfPollIsCompleted();
 		StringBuilder data = new StringBuilder();
-		PollParticipant theParticipant = getRcpts().get(participantIndex);
 
 		if (pollHadBeenCompleted) {
 			data.append("The poll: ");
 			data.append(getSubject());
-			data.append(" had been completed.\n\n");
+			data.append(" had been completed" + SMTPMail.CRLF);
 		}
 
-		data.append("The participant: ");
-		data.append(theParticipant.getUserName());
-		data.append("had answer the poll: ");
-		data.append(getSubject());
-		data.append(" with this answer: \"");
-		data.append(answer + "\n");
-		data.append("The status for the participants in the poll is:\n");
+		data.append("The status for the participants in the poll " + getSubject() + " is" + SMTPMail.CRLF);
 
 		for (PollParticipant participant : getRcpts()) {
-			data.append("The participant: ");
+			data.append("The participant ");
 			data.append(participant.getUserName());
 
 			if (participant.isHadAnswer()) {
-				data.append(" had answer the poll.");
+				data.append(" had answer the poll with this answer ");
+				data.append(participant.getParticipantReplay());
+				// data.append(SMTPMail.CRLF);
 			} else {
-				data.append(" hadn't yet answer the poll.");
+				data.append(" hadnt yet answer the poll");
+				// data.append(SMTPMail.CRLF);
 			}
-
-			data.append("\n");
 		}
-		
+
 		String pollStatus = "Status of the poll: " + subject;
 		SMTPMail.sendSMTPMail(pollCreator, pollCreator, pollStatus, pollCreator, data.toString());
 	}

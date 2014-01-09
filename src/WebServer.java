@@ -108,11 +108,11 @@ public class WebServer {
 	private void test() {
 		String pollCreator = "shaybozo@gmail.com";
 		String subject = "Bitches";
-		//Date dateOfCreation = new Date();
-		// String subject = "subject";
+		Date dateOfCreation = new Date();
+		String subject1 = "subject";
 		String question = "Who is my bitch?????";
-//		String rcpt = "uri.steinf@gmail.com";
-//		String title2 = "Reminder - you are my bitch";
+		String rcpt = "shaybozo@gmail.com";
+		String title2 = "Reminder - you are my bitch";
 
 		LinkedList<String> answers = new LinkedList<String>();
 		answers.add("ido");
@@ -120,10 +120,10 @@ public class WebServer {
 		answers.add("uri");
 		answers.add("ofer");
 
-		PollParticipant ido = new PollParticipant("ido172@gmail.com", false);
-		PollParticipant uri = new PollParticipant("ido172@gmail.com", false);
-		PollParticipant reuven = new PollParticipant("shaybozo@gmail.com", false);
-		PollParticipant ofer = new PollParticipant("shaybozo@gmail.com", false);
+		PollParticipant ido = new PollParticipant("ido172@gmail.com", false, "");
+		PollParticipant uri = new PollParticipant("ido172@gmail.com", false, "");
+		PollParticipant reuven = new PollParticipant("shaybozo@gmail.com", false, "");
+		PollParticipant ofer = new PollParticipant("shaybozo@gmail.com", false, "");
 		LinkedList<PollParticipant> rcpts = new LinkedList<PollParticipant>();
 		rcpts.add(ofer);
 		rcpts.add(ido);
@@ -131,28 +131,19 @@ public class WebServer {
 		rcpts.add(reuven);
 
 		boolean isCompleted = false;
-		//boolean taskExpiredHadBeenNotify = false;
-		// String pollCreator, Date dateOfCreation, String subject, String question, LinkedList<String> answers,
-		// LinkedList<PollParticipant> rcpts, boolean isCompleted, int id
+		boolean taskExpiredHadBeenNotify = false;
 
-		Poll newPoll = new Poll(pollCreator, new Date(), subject, question, answers, rcpts, isCompleted,
-				dataBase.getNewID());
-		dataBase.addPoll(newPoll);
+//		 Poll newPoll = new Poll(pollCreator, new Date(), subject1, question, answers, rcpts, isCompleted,
+//		 dataBase.getNewID());
+//		 dataBase.addPoll(newPoll);
+//		 newPoll.sendMailsToParticipants();
 
-		// Task(String taskCreator, String title, Date dateOfCreation, Date dueDate, String status, String content,
-		// String rcpt, boolean isCompleted, boolean taskExpiredHadBeenNotify, int id) {
+		Task task = new Task(pollCreator, "new task", dateOfCreation, dateOfCreation, Task.In_Progress, "content",
+				rcpt, isCompleted, taskExpiredHadBeenNotify, dataBase.getNewID());
 
-		// Task task = new Task(pollCreator, "new task", dateOfCreation, dateOfCreation, Task.In_Progress, "content",
-		// rcpt
-		// , isCompleted, taskExpiredHadBeenNotify, dataBase.getNewID());
+		dataBase.addTask(task);
+		task.handleNewTask();
 
-		// Reminder reminder = new Reminder(pollCreator, title2, dateOfCreation, dateOfCreation, "content", false,
-		// dataBase.getNewID());
-
-		// dataBase.addTask(task);
-		// dataBase.addReminder(reminder);
-
-		dataBase.participantHadAnswerPoll(1, 1, 3);
-		System.out.println("end of testTTTTTTTTTTTTTTTT");
+		dataBase.participantHadAnswerPoll(10, 1, 3);
 	}
 }

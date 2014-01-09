@@ -286,6 +286,7 @@ public class DataXMLManager {
 		for (PollParticipant rcpt : poll.getRcpts()) {
 			_rcpt = pollsDoc.createElement(RCPT);
 			_rcpt.setAttribute(HADREPLYED, Boolean.toString(rcpt.isHadAnswer()));
+			_rcpt.setAttribute("participantReplay", rcpt.getParticipantReplay());
 			_rcpt.appendChild(pollsDoc.createTextNode(rcpt.getUserName()));
 			_rcpts.appendChild(_rcpt);
 		}
@@ -424,8 +425,9 @@ public class DataXMLManager {
 
 		for (int i = 0; i < rcptsXML.getLength(); i++) {
 			String hadReplyed = rcptsXML.item(i).getAttributes().getNamedItem(HADREPLYED).getNodeValue();
+			String participantReplay = rcptsXML.item(i).getAttributes().getNamedItem("participantReplay").getNodeValue();
 			String rcpt = rcptsXML.item(i).getTextContent();
-			rcpts.add(new PollParticipant(rcpt, Boolean.parseBoolean(hadReplyed)));
+			rcpts.add(new PollParticipant(rcpt, Boolean.parseBoolean(hadReplyed), participantReplay));
 
 		}
 

@@ -6,8 +6,6 @@ import java.util.LinkedList;
 
 public class HTMLCreator {
 
-	
-	private static String USERNAME_PLACEHOLDER = "[USER_NAME]";
 	private static String DATA_PLACEHOLDER = "[DATA_PLACEHOLDER]";
 	private SimpleDateFormat dateFormat;
 	private SimpleDateFormat justDateFormat;
@@ -19,22 +17,12 @@ public class HTMLCreator {
 		justTimeFormat = new SimpleDateFormat("HH:mm");
 	}
 
-	public String addUserNameToPage(String userName, String htmlTemaplate) {
-			try {
-				return htmlTemaplate.replace(USERNAME_PLACEHOLDER, URLDecoder.decode(userName, "UTF-8"));
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-				return htmlTemaplate.replace(USERNAME_PLACEHOLDER, "");
-			}
-	}
-	
-	public String createRemaindersPage(String userName, String htmlTemaplate, DataBase dataBase) {
+	public String createRemainderPage(String userName, String htmlTemaplate, DataBase dataBase) {
 		StringBuilder content = new StringBuilder();
 		try {
 			String parsedUserName = URLDecoder.decode(userName, "UTF-8");
 			LinkedList<Reminder> reminders = dataBase.retrieveReminderByUser(parsedUserName);
 			if (reminders.size() > 0 ) {
-				content.append("<table width='100%' border=1>");
 				content.append("<tr>");
 				content.append("<th>Title</th>");
 				content.append("<th>Date Of Creation</th>");
@@ -47,103 +35,31 @@ public class HTMLCreator {
 					content.append("<td>"+reminder.getTitle()+"</td>");
 					content.append("<td>" + getDateInRightformat(reminder.getDateOfCreation()) + "</td>");
 					content.append("<td>" +	getDateInRightformat(reminder.getDateOfReminding()) + "</td>");
-					content.append("<td><a data-role=button onclick=storeReminderData" + builderReminderIdParams(reminder) + " href=reminder_editor.html>Edit</a></td>");
-					content.append("<td><form action='submit_reminder.html' data-ajax='false' method='POST'><input type='submit' value='delete' /><input type='hidden' name='id' value='" + reminder.getId()+  "'/><input type='hidden' name='delete' value='delete'/></form></td>");
+					content.append("<td><a data-role='button' href='reminder_editor.html?" + builderReminderIdParams(reminder) + "'>Edit</a></td>");
+					content.append("<td><form action='submit_reminder.html' data-ajax='false' method='POST'><input type='submit' value='delete' /><input type='hidden' name='delete'/></form></td>");
 					content.append("</tr>");
 				}
-				content.append("</table>");
 			}
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-		return htmlTemaplate.replace(DATA_PLACEHOLDER, content.toString());
-	}
-	
-	public String createTasksPage(String userName, String htmlTemaplate, DataBase dataBase) {
-		StringBuilder content = new StringBuilder();
-		try {
-			String parsedUserName = URLDecoder.decode(userName, "UTF-8");
-			LinkedList<Task> tasks = dataBase.retrieveTasksByUser(parsedUserName);
-			if (tasks.size() > 0 ) {
-				content.append("<table width='100%' border=1>");
-				content.append("<tr>");
-				content.append("<th>Title</th>");
-				content.append("<th>Date Of Creation</th>");
-				content.append("<th>Date and time<br/>of due date</th>");
-				content.append("<th>Status</th>");
-				content.append("<th>Delete</th>");
-		        content.append("</tr>");
-				for (Task task : tasks) {
-					content.append("<tr>");
-					content.append("<td>"+task.getTitle()+"</td>");
-					content.append("<td>" + getDateInRightformat(task.getDateOfCreation()) + "</td>");
-					content.append("<td>" +	getDateInRightformat(task.getDueDate()) + "</td>");
-					content.append("<td>" +	task.getStatus() + "</td>");
-					if (task.getStatus().equals(Task.In_Progress))
-						content.append("<td><form action='submit_reminder.html' data-ajax='false' method='POST'><input type='submit' value='delete' /><input type='hidden' name='id' value='" + task.getId()+  "'/><input type='hidden' name='delete' value='delete'/></form></td>");
-					else {
-						content.append("<td></td>");
-					}
-					content.append("</tr>");
-				}
-				content.append("</table>");
-			}
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-		
-		return htmlTemaplate.replace(DATA_PLACEHOLDER, content.toString());
-	}
-	
-	public String createPollsPage(String userName, String htmlTemaplate, DataBase dataBase) {
-		StringBuilder content = new StringBuilder();
-		try {
-			String parsedUserName = URLDecoder.decode(userName, "UTF-8");
-			LinkedList<Task> tasks = dataBase.retrieveTasksByUser(parsedUserName);
-			if (tasks.size() > 0 ) {
-				content.append("<table width='100%' border=1>");
-				content.append("<tr>");
-				content.append("<th>Title</th>");
-				content.append("<th>Date Of Creation</th>");
-				content.append("<th>Date and time<br/>of due date</th>");
-				content.append("<th>Status</th>");
-				content.append("<th>Delete</th>");
-		        content.append("</tr>");
-				for (Task task : tasks) {
-					content.append("<tr>");
-					content.append("<td>"+task.getTitle()+"</td>");
-					content.append("<td>" + getDateInRightformat(task.getDateOfCreation()) + "</td>");
-					content.append("<td>" +	getDateInRightformat(task.getDueDate()) + "</td>");
-					content.append("<td>" +	task.getStatus() + "</td>");
-					if (task.getStatus().equals(Task.In_Progress))
-						content.append("<td><form action='submit_reminder.html' data-ajax='false' method='POST'><input type='submit' value='delete' /><input type='hidden' name='id' value='" + task.getId()+  "'/><input type='hidden' name='delete' value='delete'/></form></td>");
-					else {
-						content.append("<td></td>");
-					}
-					content.append("</tr>");
-				}
-				content.append("</table>");
-			}
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-		
 		return htmlTemaplate.replace(DATA_PLACEHOLDER, content.toString());
 	}
 
 	private String builderReminderIdParams(Reminder reminder) {
-		StringBuilder editParams = new StringBuilder();
-		editParams.append("('"+reminder.getId()+"'");
-		editParams.append(",");
-		editParams.append("'"+reminder.getTitle()+"'");
-		editParams.append(",");
-		editParams.append("'"+reminder.getContent()+"'");
-		editParams.append(",");
-		editParams.append("'"+getJustDate(reminder.getDateOfReminding())+"'");
-		editParams.append(",");
-		editParams.append("'"+getJustTime(reminder.getDateOfReminding())+"')");
-		return editParams.toString();
-		
+		StringBuilder urlParams = new StringBuilder();
+		urlParams.append("subject=");
+		urlParams.append(reminder.getTitle());
+		urlParams.append("&");
+		urlParams.append("content=");
+		urlParams.append(reminder.getContent());
+		urlParams.append("&");
+		urlParams.append("date=");
+		urlParams.append(getJustDate(reminder.getDateOfReminding()));
+		urlParams.append("&");
+		urlParams.append("time=");
+		urlParams.append(getJustTime(reminder.getDateOfReminding()));
+		return urlParams.toString();
 	}
 
 	private String getDateInRightformat(Date date) {

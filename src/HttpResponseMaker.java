@@ -1,31 +1,23 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.util.HashMap;
 
 public class HttpResponseMaker {
+	private HttpRequestHandler httpRequest = null;
 	private HTMLCreator htmlCreator;
-	private HttpRequestHandler httpRequest;
 	private String defaultPage;
 	private String root;
-	private DataBase dataBase;
-	private HashMap<String, String> params;
-	private HashMap<String, String> request;
 
 	public HttpResponseMaker(HttpRequestHandler httpRequest) {
-		this.httpRequest= httpRequest; 
+		this.httpRequest = httpRequest;
 		htmlCreator = new HTMLCreator();
 		defaultPage = httpRequest.defaultPage;
 		root = httpRequest.root;
-		dataBase = httpRequest.dataBase;
-		params = httpRequest.httpRequestParams;
-		request = httpRequest.parsedHttpRequest;
 	}
 
 	public HttpResponse handleGETRequest() throws IOException {
 
-		String location = request.get(RequestParser.LOCATION).substring(1);
+		String location = httpRequest.parsedHttpRequest.get(RequestParser.LOCATION).substring(1);
 		String mailInCookie = getMailCookie();
 		String response;
 		String cookie = null;
@@ -37,10 +29,10 @@ public class HttpResponseMaker {
 				response = HttpResponse.RESPONSE_302_REDIRECT;
 			}
 		} else { // has cookie
-			if (location.equals(defaultPage) && params.containsKey("logout")) { // logout
+			if (location.equals(defaultPage) && httpRequest.httpRequestParams.containsKey("delete")) { // logout
 				response = HttpResponse.RESPONSE_200_OK;
 				cookie = "";
-			} else if (location.length() == 0 || location.equals(defaultPage) || location.contains("submit")) {
+			} else if (location.length() == 0 || location.equals("/" + defaultPage) || location.contains("submit")) {
 				// asking for a submit page in GET method will redirect you to main.
 				location = "main.html";
 				response = HttpResponse.RESPONSE_302_REDIRECT;
@@ -54,55 +46,33 @@ public class HttpResponseMaker {
 
 	public HttpResponse handlePOSTRequest() throws IOException {
 
-		String location = request.get(RequestParser.LOCATION).substring(1);
+		String location = httpRequest.parsedHttpRequest.get(RequestParser.LOCATION);
 
 		String response = HttpResponse.RESPONSE_200_OK;
 		String userName = null;
 		String user = getMailCookie();
-		HttpParamsToTask handler = new HttpParamsToTask(dataBase, params);
+		HttpParamsToTask handler = new HttpParamsToTask(httpRequest.dataBase, httpRequest.httpRequestParams);
 		if (user == null) {
-			if (location.equals("main.html") && params.containsKey("login")) { // location is "/" no
-				// cookie
-				response = HttpResponse.RESPONSE_200_OK;
-				userName = params.get("login");
+			return makeErrorPageResponse(HttpResponse.RESPONSE_404_NOT_FOUND, HttpResponse.RESPONSE_404_NOT_FOUND);
+		}
+
+		if (location.equals("main.html") && httpRequest.httpRequestParams.containsKey("login")) { // location is "/" no
+																									// cookie
+			response = HttpResponse.RESPONSE_200_OK;
+			userName = httpRequest.httpRequestParams.get("login");
+		} else if (location.equals("/submit_reminder.html")) {
+			if (handler.isEditRequest()) {
+				handler.editReminderInDateBase(user,
+						Integer.parseInt(httpRequest.httpRequestParams.get(DataXMLManager.ID)));
+			} else if (handler.isDeleteRequest()) {
+				handler.deleteReminderInDateBase(Integer.parseInt(httpRequest.httpRequestParams.get(DataXMLManager.ID)));
 			} else {
-				return makeErrorPageResponse(HttpResponse.RESPONSE_400_BAD_REQUEST, HttpResponse.RESPONSE_400_BAD_REQUEST);	
+				handler.createReminderInDataBase(user);
 			}
-			
-			//Reminders
-		} else if (location.equals("submit_reminder.html")) {
-			boolean result = true;
-			if (handler.isDeleteRequest()  && handler.isValidDeleteRequest(user)) {
-				handler.deleteReminderInDateBase(Integer.parseInt(params.get(DataXMLManager.ID)));
-				location = "reminders.html";
-				response = HttpResponse.RESPONSE_302_REDIRECT;
-			} else if (handler.isEditRequest() && handler.isValidReminderEdit(user)) {
-				result = handler.editReminderInDateBase(user, Integer.parseInt(params.get(DataXMLManager.ID)));
-				location = "reminders.html";
-				response = HttpResponse.RESPONSE_302_REDIRECT;
-			} else if (handler.isValidNewReminder()) {
-				result = handler.createNewReminderInDataBase(user);
-				location = "reminders.html";
-				response = HttpResponse.RESPONSE_302_REDIRECT;
-			} else {
-				response = HttpResponse.RESPONSE_200_OK;	//Error page
-			}
-			
-		} else if (location.equals("submit_task.html")) {
-			boolean result = true;
-			if (handler.isDeleteRequest() && handler.isValidDeleteRequest(user)) {
-				handler.deleteTaskInDateBase(Integer.parseInt(params.get(DataXMLManager.ID)));
-				location = "tasks.html";
-				response = HttpResponse.RESPONSE_302_REDIRECT;
-			} else if (handler.isValidNewTask()) {
-				result = handler.createNewTaskInDataBase(user);
-				location = "tasks.html";
-				response = HttpResponse.RESPONSE_302_REDIRECT;
-			} else {
-				response = HttpResponse.RESPONSE_200_OK;	//Error page
-			}
+			location = "reminders.html";
+			response = HttpResponse.RESPONSE_302_REDIRECT;
 		} else {
-			return makeErrorPageResponse(HttpResponse.RESPONSE_400_BAD_REQUEST, HttpResponse.RESPONSE_400_BAD_REQUEST);
+			return makeErrorPageResponse(HttpResponse.RESPONSE_404_NOT_FOUND, HttpResponse.RESPONSE_404_NOT_FOUND);
 		}
 
 		return responseFromFile(response, location, userName);
@@ -115,19 +85,14 @@ public class HttpResponseMaker {
 			String fileName = requestedFile.getName();
 			String contentType = FileTypeToContentType.convert(fileName);
 			String responseBody = FileToString.readFile(requestedFile);
-			String name = getMailCookie();
-			if (name != null && contentType.equals(HttpHeaders.CONTENT_TYPE_HTML)) {
-				responseBody = htmlCreator.addUserNameToPage(name, responseBody);
-			}
 			switch (fileName.toLowerCase()) {
-				case "reminders.html":
-					responseBody = htmlCreator.createRemaindersPage(getMailCookie(), responseBody, dataBase);
-					break;
-				case "tasks.html":
-					responseBody = htmlCreator.createTasksPage(getMailCookie(), responseBody, dataBase);
-					break;
-				case "polls.html":
-					break;
+			case "reminders.html":
+				responseBody = htmlCreator.createRemainderPage(getMailCookie(), responseBody, httpRequest.dataBase);
+				break;
+			case "tasks.html":
+				break;
+			case "polls.html":
+				break;
 			}
 
 			return makeHttpResponse(responseCode, responseBody, contentType, cookieParam, fileLoction);
@@ -137,6 +102,32 @@ public class HttpResponseMaker {
 		} catch (NullPointerException e) {
 			return makeErrorPageResponse(HttpResponse.RESPONSE_404_NOT_FOUND, "The file you requested is not found");
 		}
+	}
+
+	public HttpResponse makeOptionsResponse() {
+		httpRequest.isHeadRequest = true;
+		HttpResponse httpResponse = makeHttpResponse(HttpResponse.RESPONSE_200_OK, "",
+				HttpHeaders.CONTENT_TYPE_MESSAGE, null, null);
+		StringBuilder sb = new StringBuilder();
+		int len = HttpRequestHandler.ALLOWED_METHODS.length;
+		for (int i = 0; i < len; i++) {
+			sb.append(HttpRequestHandler.ALLOWED_METHODS[i]);
+			if (i < len - 1) {
+				sb.append(", ");
+			}
+		}
+
+		httpResponse.appendHeader(HttpHeaders.HEADER_ALLOW, sb.toString());
+		return httpResponse;
+	}
+
+	public HttpResponse makeErrorPageResponse(String responseType, String bodyText) {
+		httpRequest.isKeepAlive = false;
+		httpRequest.isChunked = false;
+		String responseBody = HttpResponse.ERROR_PAGE_TEMPLATE;
+		responseBody = responseBody.replace(HttpResponse.PLCAEHOLDER_TITLE, responseType);
+		responseBody = responseBody.replace(HttpResponse.PLCAEHOLDER_BODY, bodyText);
+		return makeHttpResponse(responseType, responseBody, HttpHeaders.CONTENT_TYPE_HTML, null, null);
 	}
 
 	public HttpResponse makeHttpResponse(String responseType, String responseBody, String contentType, String cookie,
@@ -164,7 +155,6 @@ public class HttpResponseMaker {
 
 		httpResponse.appendHeader(HttpHeaders.HEADER_CONTENT_LENGTH, length);
 		httpResponse.appendHeader(HttpHeaders.HEADER_CONNECTION, connection);
-		
 		if (cookie != null && cookie.length() == 0) {
 			httpResponse.appendHeader(HttpHeaders.HEADER_SET_COOKIE, HttpHeaders.COOKIE_PARAM + "="
 					+ HttpHeaders.COOKIE_DELETED_VALUE);
@@ -175,44 +165,14 @@ public class HttpResponseMaker {
 		httpResponse.appendBody(responseBody);
 		return httpResponse;
 	}
-	
-	public HttpResponse makeOptionsResponse() {
-		httpRequest.isHeadRequest = true;
-		HttpResponse httpResponse = makeHttpResponse(HttpResponse.RESPONSE_200_OK, "",
-				HttpHeaders.CONTENT_TYPE_MESSAGE, null, null);
-		StringBuilder sb = new StringBuilder();
-		int len = HttpRequestHandler.ALLOWED_METHODS.length;
-		for (int i = 0; i < len; i++) {
-			sb.append(HttpRequestHandler.ALLOWED_METHODS[i]);
-			if (i < len - 1) {
-				sb.append(", ");
-			}
-		}
 
-		httpResponse.appendHeader(HttpHeaders.HEADER_ALLOW, sb.toString());
-		return httpResponse;
-	}
-
-	public HttpResponse makeErrorPageResponse(String responseType, String bodyText) {
-		httpRequest.isKeepAlive = false;
-		httpRequest.isChunked = false;
-		String responseBody = HttpResponse.ERROR_PAGE_TEMPLATE;
-		responseBody = responseBody.replace(HttpResponse.PLCAEHOLDER_TITLE, responseType);
-		responseBody = responseBody.replace(HttpResponse.PLCAEHOLDER_BODY, bodyText);
-		return makeHttpResponse(responseType, responseBody, HttpHeaders.CONTENT_TYPE_HTML, null, null);
-	}
 	private String getMailCookie() {
 		String result = null;
-		if (request.containsKey(HttpHeaders.HEADER_COOKIE.toLowerCase())
-				&& request.get(HttpHeaders.HEADER_COOKIE.toLowerCase()).contains(
+		if (httpRequest.parsedHttpRequest.containsKey(HttpHeaders.HEADER_COOKIE.toLowerCase())
+				&& httpRequest.parsedHttpRequest.get(HttpHeaders.HEADER_COOKIE.toLowerCase()).contains(
 						HttpHeaders.COOKIE_PARAM)) {
-			String cookie = request.get(HttpHeaders.HEADER_COOKIE.toLowerCase());
-			try {
-				result = (cookie.split("=")[1].equals(HttpHeaders.COOKIE_DELETED_VALUE)) ? null : cookie.split("=")[1];
-				result = URLDecoder.decode(result, "UTF-8");
-			} catch (Exception e) {
-				result = null;
-			}
+			String cookie = httpRequest.parsedHttpRequest.get(HttpHeaders.HEADER_COOKIE.toLowerCase());
+			result = (cookie.split("=")[1].equals(HttpHeaders.COOKIE_DELETED_VALUE)) ? null : cookie.split("=")[1];
 		}
 
 		return result;
