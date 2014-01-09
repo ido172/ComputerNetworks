@@ -83,9 +83,9 @@ public class Poll {
 
 			data.append("\n");
 		}
-
-		SMTPMail.sendSMTPMail(pollCreator, currParticipant.getUserName(), "Poll: " + subject, pollCreator,
-				data.toString());
+		
+		String pollStatus = "Status of the poll: " + subject;
+		SMTPMail.sendSMTPMail(pollCreator, pollCreator, pollStatus, pollCreator, data.toString());
 	}
 
 	private boolean checkIfPollIsCompleted() {

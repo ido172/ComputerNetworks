@@ -13,7 +13,7 @@ public class SMTPMail {
 	public static String Client_Name = "ShayBozo IdoOrlov";
 	public static String EHLO = "EHLO";
 	public static String HELO = "HELO";
-	static String From_name = "Mr. Tasker";
+	static String From_name = "Mr.Tasker";
 	static String Dot = ".";
 	static String MAIL_FROM = "MAIL FROM:";
 	static String RCPT_TO = "RCPT TO:";
