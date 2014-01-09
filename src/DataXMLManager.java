@@ -261,7 +261,6 @@ public class DataXMLManager {
 
 		Element pollAsElement = pollsDoc.createElement(ITEM);
 		pollAsElement.setAttribute(USER, poll.getPollCreator());
-		pollAsElement.setAttribute(TITLE, poll.getTitle());
 		pollAsElement.setAttribute(DATE, new SimpleDateFormat(TIME_FORMAT).format(poll.getDateOfCreation()));
 		pollAsElement.setAttribute(SUBJECT, poll.getSubject());
 		pollAsElement.setAttribute("question", poll.getQuestion());
@@ -398,7 +397,6 @@ public class DataXMLManager {
 		NamedNodeMap att = item.getAttributes();
 
 		String user = att.getNamedItem(USER).getNodeValue();
-		String title = att.getNamedItem(TITLE).getNodeValue();
 		String dateOfCreationInString = att.getNamedItem(DATE).getNodeValue();
 		int id = Integer.parseInt(att.getNamedItem(ID).getNodeValue());
 
@@ -431,7 +429,7 @@ public class DataXMLManager {
 
 		}
 
-		Poll pollFromFile = new Poll(user, title, dateOfCreation, subject, question, answers, rcpts, isCompleted, id);
+		Poll pollFromFile = new Poll(user, dateOfCreation, subject, question, answers, rcpts, isCompleted, id);
 
 		return pollFromFile;
 	}
@@ -462,40 +460,4 @@ public class DataXMLManager {
 			}
 		}
 	}
-
-	// public void taskTimeToCompleteHadExpired(int taskID) {
-	// synchronized (tasksDoc) {
-	//
-	// Element taskToBeChangeAsNode = (Element) retriveTaskItemByID(taskID);
-	// taskToBeChangeAsNode.setAttribute(, ANSWER);
-	//
-	//
-	// DOMSource source = new DOMSource(tasksDoc);
-	// StreamResult result = new StreamResult(tasksDataBase);
-	//
-	// try {
-	// transformer.transform(source, result);
-	// } catch (TransformerException e) {
-	// e.printStackTrace();
-	// }
-	// }
-	// }
-	//
-	// public void taskHadBeenCompleted(int taskID) {
-	// synchronized (tasksDoc) {
-	//
-	// Element taskToBeChangeAsNode = (Element) retriveTaskItemByID(taskID);
-	// taskToBeChangeAsNode.setAttribute(, ANSWER);
-	//
-	//
-	// DOMSource source = new DOMSource(tasksDoc);
-	// StreamResult result = new StreamResult(tasksDataBase);
-	//
-	// try {
-	// transformer.transform(source, result);
-	// } catch (TransformerException e) {
-	// e.printStackTrace();
-	// }
-	// }
-	// }
 }

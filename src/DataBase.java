@@ -302,13 +302,10 @@ public class DataBase {
 		return returndTask;
 	}
 
-	public void participantHadAnswerPoll(int pollID, String pollParticipantName) {
-
+	public void participantHadAnswerPoll(int pollID, int participantIndex, int answerIndex) {
 		Poll poll = retrivePollByID(pollID);
-		Poll oldPoll = poll.duplicatePoll();
-		poll.participantHadAnswer(int participantIndex, int answerIndex);
-
-		dataXMLManager.deletePollFromXML(oldPoll);
+		dataXMLManager.deletePollFromXML(poll);
+		poll.participantHadAnswer(participantIndex, answerIndex);
 		dataXMLManager.addPoll(poll);
 	}
 
