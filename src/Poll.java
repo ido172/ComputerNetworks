@@ -42,7 +42,7 @@ public class Poll {
 				mailContent.append(SMTPMail.CRLF);
 			}
 
-			SMTPMail.sendSMTPMail(pollCreator, rcpts.get(i).getUserName(), "Poll: " + subject, pollCreator,
+			SMTPMail.sendSMTPMail(pollCreator, rcpts.get(i).getUserName(), "Poll " + subject, pollCreator,
 					mailContent.toString());
 		}
 	}
@@ -57,7 +57,7 @@ public class Poll {
 		StringBuilder data = new StringBuilder();
 
 		if (pollHadBeenCompleted) {
-			data.append("The poll: ");
+			data.append("The poll ");
 			data.append(getSubject());
 			data.append(" had been completed" + SMTPMail.CRLF);
 		}
@@ -78,7 +78,7 @@ public class Poll {
 			}
 		}
 
-		String pollStatus = "Status of the poll: " + subject;
+		String pollStatus = "Status of the poll " + subject;
 		SMTPMail.sendSMTPMail(pollCreator, pollCreator, pollStatus, pollCreator, data.toString());
 	}
 

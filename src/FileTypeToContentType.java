@@ -8,6 +8,14 @@ public class FileTypeToContentType {
 		if (fileType.equals("html") || fileType.equals("txt")) 
 		{
 			contentType = HttpHeaders.CONTENT_TYPE_HTML;
+		}
+		else if (fileType.equals("css")) 
+		{
+			contentType = HttpHeaders.CONTENT_TYPE_CSS;
+		}
+		else if (fileType.equals("js")) 
+		{
+			contentType = HttpHeaders.CONTENT_TYPE_JS;
 		} 
 		else if (fileType.equals("bmp") || fileType.equals("gif")
 				|| fileType.equals("jpg") || fileType.equals("png"))

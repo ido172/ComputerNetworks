@@ -141,9 +141,13 @@ public class WebServer {
 		Task task = new Task(pollCreator, "new task", dateOfCreation, dateOfCreation, Task.In_Progress, "content",
 				rcpt, isCompleted, taskExpiredHadBeenNotify, dataBase.getNewID());
 
-		dataBase.addTask(task);
-		task.handleNewTask();
-
-		dataBase.participantHadAnswerPoll(10, 1, 3);
+//		dataBase.addTask(task);
+//		task.handleNewTask();
+//
+//		dataBase.participantHadAnswerPoll(10, 1, 3);
+		
+		SMTPMail.sendSMTPMail(pollCreator, rcpt, "test1", pollCreator, "lalalalla");
+		SMTPMail.sendSMTPMail(pollCreator, rcpt, "test2", pollCreator, "lalalal " + SMTPMail.CRLF + SMTPMail.CRLF);
+		SMTPMail.sendSMTPMail(pollCreator, rcpt, "test3", pollCreator, "lalalal. \\: " + SMTPMail.CRLF);
 	}
 }
