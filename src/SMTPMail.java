@@ -63,12 +63,6 @@ public class SMTPMail {
 				sentence = inFromServer.readLine();
 				System.out.println(sentence);
 
-				// sentence = inFromServer.readLine();
-				// if (!sentence.substring(0, 2).equals(Code220)) {
-				// clientSocket.close();
-				// return;
-				// }
-
 				// EHLO and Auto login part.
 				if (ConfigFile.SMTPIsAuthLogin.toUpperCase().equals("TRUE")) {
 
@@ -77,74 +71,40 @@ public class SMTPMail {
 					System.out.println(sentence = inFromServer.readLine());
 					System.out.println(sentence = inFromServer.readLine());
 					System.out.println(sentence = inFromServer.readLine());
-					// sentence = inFromServer.readLine();
-					// if (!sentence.substring(0, 2).equals(OK_Code)) {
-					// clientSocket.close();
-					// return;
-					// }
 
 					// AUTH LOGIN part.
 					outToServer.writeBytes(AUTH_LOGIN + CRLF);
 					System.out.println(sentence = inFromServer.readLine());
-					// if (!sentence.substring(0, 2).equals("334")) {
-					// clientSocket.close();
-					// return;
-					// }
 
 					// SMTPName part.
 					outToServer.writeBytes(DatatypeConverter.printBase64Binary(ConfigFile.SMTPUsername.getBytes())
 							+ CRLF);
 					System.out.println(sentence = inFromServer.readLine());
-					// if (!sentence.substring(0, 2).equals("334")) {
-					// clientSocket.close();
-					// return;
-					// }
 
 					// SMTPPassword part.
 					outToServer.writeBytes(DatatypeConverter.printBase64Binary(ConfigFile.SMTPPassword.getBytes())
 							+ CRLF);
 					System.out.println(sentence = inFromServer.readLine());
-					// if (!sentence.substring(0, 2).equals("235")) {
-					// clientSocket.close();
-					// return;
-					// }
 
 				} else {
-					// HELO
+					// HELO part.
 					outToServer.writeBytes(HELO + " " + Client_Name + CRLF);
-					// sentence = inFromServer.readLine();
-					// if (!sentence.substring(0, 2).equals(OK_Code)) {
-					// clientSocket.close();
-					// return;
-					// }
 				}
 
 				// MAIL FROM part.
 				outToServer.writeBytes(MAIL_FROM + " " + from + CRLF);
 				System.out.println(MAIL_FROM + " " + from + CRLF);
 				System.out.println(sentence = inFromServer.readLine());
-				// sentence = inFromServer.readLine();
-				// if (!sentence.substring(0, 2).equals(OK_Code)) {
-				// return;
-				// }
 
 				// RCTP TO part.
 				outToServer.writeBytes(RCPT_TO + " " + address + CRLF);
 				System.out.println(RCPT_TO + " " + address + CRLF);
 				System.out.println(sentence = inFromServer.readLine());
-				// sentence = inFromServer.readLine();
-				// if (!sentence.substring(0, 2).equals(OK_Code)) {
-				// return;
-				// }
 
 				// DATA part.
 				outToServer.writeBytes(DATA + CRLF);
 				System.out.println(DATA + CRLF);
 				System.out.println(sentence = inFromServer.readLine());
-				// sentence = inFromServer.readLine();
-				// if (!sentence.substring(0, 2).equals(DataOKCode)) {
-				// return;
-				// }
 
 				// Mail context part.
 				StringBuilder MailContext = new StringBuilder();
@@ -169,18 +129,11 @@ public class SMTPMail {
 				outToServer.writeBytes(MailContext.toString());
 				System.out.println(MailContext.toString());
 				System.out.println(sentence = inFromServer.readLine());
-				// if (!sentence.substring(0, 2).equals(OK_Code)) {
-				// return;
-				// }
 
 				// Quit part.
 				outToServer.writeBytes(QUIT + CRLF);
 				System.out.println(QUIT + CRLF);
 				System.out.println(sentence = inFromServer.readLine());
-				// sentence = inFromServer.readLine();
-				// if (!sentence.substring(0, 2).equals("221")) {
-				// return;
-				// }
 
 				clientSocket.close();
 

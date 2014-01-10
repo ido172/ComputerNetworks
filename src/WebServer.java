@@ -1,8 +1,6 @@
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.*;
-import java.util.Date;
-import java.util.LinkedList;
 
 public class WebServer {
 
@@ -50,9 +48,6 @@ public class WebServer {
 
 			ServerSocket socket;
 
-			// /////////////////////////////////////???????????????????
-			test();
-			// ////////////////////////////////////???????????????????
 			try {
 
 				// Receive client connection.
@@ -103,51 +98,5 @@ public class WebServer {
 
 	public void setThreadPool(ThreadPool threadPool) {
 		this.threadPool = threadPool;
-	}
-
-	private void test() {
-		String pollCreator = "shaybozo@gmail.com";
-		String subject = "Bitches";
-		Date dateOfCreation = new Date();
-		String subject1 = "subject";
-		String question = "Who is my bitch?????";
-		String rcpt = "shaybozo@gmail.com";
-		String title2 = "Reminder - you are my bitch";
-
-		LinkedList<String> answers = new LinkedList<String>();
-		answers.add("ido");
-		answers.add("reuven");
-		answers.add("uri");
-		answers.add("ofer");
-
-		PollParticipant ido = new PollParticipant("ido172@gmail.com", false, "");
-		PollParticipant uri = new PollParticipant("ido172spam@gmail.com", false, "");
-		PollParticipant shayWalla = new PollParticipant("shaybozo@walla.com", false, "");
-		PollParticipant shayGmail = new PollParticipant("shaybozo@gmail.com", false, "");
-		LinkedList<PollParticipant> rcpts = new LinkedList<PollParticipant>();
-		rcpts.add(ido);
-		rcpts.add(uri);
-		rcpts.add(shayWalla);
-		rcpts.add(shayGmail);
-
-		boolean isCompleted = false;
-		boolean taskExpiredHadBeenNotify = false;
-
-		Poll newPoll = new Poll(pollCreator, new Date(), subject1, question, answers, rcpts, isCompleted,
-				dataBase.getNewID());
-		dataBase.addPoll(newPoll);
-		newPoll.sendMailsToParticipants();
-
-		Task task = new Task(pollCreator, "new task", dateOfCreation, dateOfCreation, Task.In_Progress, "content",
-				rcpt, isCompleted, taskExpiredHadBeenNotify, dataBase.getNewID());
-
-		dataBase.addTask(task);
-		task.handleNewTask();
-
-		dataBase.participantHadAnswerPoll(12, "ido172@gmail.com", 3);
-		dataBase.participantHadAnswerPoll(12, "ido172spam@gmail.com", 3);
-		dataBase.participantHadAnswerPoll(12, "shaybozo@walla.com", 3);
-		// dataBase.participantHadAnswerPoll(12, "shaybozo@gmail.com", 3);
-
 	}
 }
