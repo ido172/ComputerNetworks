@@ -15,6 +15,7 @@ public class ConfigFile {
 	public static String reminderFilePath;
 	public static String taskFilePath;
 	public static String pollFilePath;
+	public static String SERVERPORT;
 
 	public static void readConfogFile(String filePath, WebServer webServer) throws NullPointerException, IOException {
 
@@ -34,7 +35,8 @@ public class ConfigFile {
 		}
 
 		// Set server parameters.
-		webServer.setPort(Integer.parseInt(hashMap.get("port")));
+		SERVERPORT = hashMap.get("port");
+		webServer.setPort(Integer.parseInt(SERVERPORT));
 		webServer.setRoot(hashMap.get("root"));
 		webServer.setDefaultPage(hashMap.get("defaultPage"));
 		webServer.setMaxThreads(Integer.parseInt(hashMap.get("maxThreads")));

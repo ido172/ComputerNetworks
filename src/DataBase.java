@@ -313,10 +313,10 @@ public class DataBase {
 		return returndTask;
 	}
 
-	public void participantHadAnswerPoll(int pollID, int participantIndex, int answerIndex) {
+	public void participantHadAnswerPoll(int pollID, String participantName, int answerIndex) {
 		Poll poll = retrivePollByID(pollID);
 		dataXMLManager.deletePollFromXML(poll);
-		poll.participantHadAnswer(participantIndex, answerIndex);
+		poll.participantHadAnswer(participantName, answerIndex);
 		dataXMLManager.addPoll(poll);
 	}
 

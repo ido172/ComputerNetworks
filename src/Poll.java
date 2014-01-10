@@ -32,11 +32,13 @@ public class Poll {
 
 			StringBuilder mailContent = new StringBuilder();
 			mailContent.append(question);
+			mailContent.append(SMTPMail.CRLF);
 
 			for (int j = 0; j < answers.size(); j++) {
 
-				link = "click on http://" + ConfigFile.ServerName + "/poll_reply.html?id=" + getId() + "&answer=" + j
-						+ "&rcpt=" + i + " for the answer: " + answers.get(j);
+				link = "click on http://" + ConfigFile.ServerName + ":" + ConfigFile.SERVERPORT
+						+ "/poll_reply.html?id=" + getId() + "&answer=" + j + "&rcpt="
+						+ getRcpts().get(i).getUserName() + " for the answer  " + answers.get(j);
 
 				mailContent.append(link);
 				mailContent.append(SMTPMail.CRLF);
@@ -47,19 +49,21 @@ public class Poll {
 		}
 	}
 
-	public void participantHadAnswer(int participantIndex, int answerIndex) {
-		// TODO
+	public void participantHadAnswer(String participantName, int answerIndex) {
+
 		String answer = getAnswers().get(answerIndex);
-		PollParticipant currParticipant = getRcpts().get(participantIndex);
+		PollParticipant currParticipant = retriveParticipantByName(participantName);
 		currParticipant.setParticipantReplay(answer);
 		currParticipant.setHadAnswer(true);
 		boolean pollHadBeenCompleted = checkIfPollIsCompleted();
 		StringBuilder data = new StringBuilder();
 
 		if (pollHadBeenCompleted) {
-			data.append("The poll ");
+			isCompleted = true;
+			data.append("The poll: ");
 			data.append(getSubject());
 			data.append(" had been completed" + SMTPMail.CRLF);
+
 		}
 
 		data.append("The status for the participants in the poll " + getSubject() + " is" + SMTPMail.CRLF);
@@ -71,15 +75,25 @@ public class Poll {
 			if (participant.isHadAnswer()) {
 				data.append(" had answer the poll with this answer ");
 				data.append(participant.getParticipantReplay());
-				// data.append(SMTPMail.CRLF);
+				data.append(SMTPMail.CRLF);
 			} else {
 				data.append(" hadnt yet answer the poll");
-				// data.append(SMTPMail.CRLF);
+				data.append(SMTPMail.CRLF);
 			}
 		}
 
 		String pollStatus = "Status of the poll " + subject;
 		SMTPMail.sendSMTPMail(pollCreator, pollCreator, pollStatus, pollCreator, data.toString());
+	}
+
+	private PollParticipant retriveParticipantByName(String participantName) {
+
+		for (PollParticipant participant : getRcpts()) {
+			if (participant.getUserName().equals(participantName)) {
+				return participant;
+			}
+		}
+		return null;
 	}
 
 	private boolean checkIfPollIsCompleted() {

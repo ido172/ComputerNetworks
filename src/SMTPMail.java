@@ -160,6 +160,7 @@ public class SMTPMail {
 				MailContext.append(" ");
 				MailContext.append(sender);
 				MailContext.append(CRLF);
+				MailContext.append(CRLF);
 				MailContext.append(data);
 				MailContext.append(CRLF);
 				MailContext.append(Dot);

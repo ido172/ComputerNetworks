@@ -32,10 +32,10 @@ public class Task {
 	}
 
 	public void taskHadBeenCompleted() {
-		//TODO
 		isCompleted = true;
+		status = Completed;
 		StringBuilder mailContent = new StringBuilder();
-		mailContent.append("The task:");
+		mailContent.append("The task");
 		mailContent.append(SMTPMail.CRLF);
 		mailContent.append(content);
 		mailContent.append(SMTPMail.CRLF + "Had been completed");
@@ -44,18 +44,16 @@ public class Task {
 	}
 
 	public void handleExpiredTask() {
-		// TODO
 		taskExpiredHadBeenNotify = true;
 		status = Time_Is_Due;
 
 		StringBuilder mailContentTaskCreator = new StringBuilder();
-		mailContentTaskCreator.append("Thetask:");
+		mailContentTaskCreator.append("The task: ");
 		mailContentTaskCreator.append(title);
-		mailContentTaskCreator.append("hadnt been completed on time.");
+		mailContentTaskCreator.append(" hadn't been completed on time.");
 
 		SMTPMail.sendSMTPMail(taskCreator, taskCreator, ExpiredTaskMassage, taskCreator,
 				mailContentTaskCreator.toString());
-		// mailContentTaskCreator.toString());
 
 		StringBuilder mailContentTaskRcpt = new StringBuilder();
 		mailContentTaskRcpt.append("You had falied to complete the task: ");
@@ -65,16 +63,18 @@ public class Task {
 	}
 
 	public void handleNewTask() {
-		// TODO
+
 		StringBuilder mailContent = new StringBuilder();
+		mailContent.append("New task: " + content + SMTPMail.CRLF);
 		mailContent.append("To mark the task: ");
 		mailContent.append(title);
-		mailContent.append(" as completed press this link: http://");
+		mailContent.append(" as completed press this link http://");
 		mailContent.append(ConfigFile.ServerName);
+		mailContent.append(":" + ConfigFile.SERVERPORT);
 		mailContent.append("/task_reply.html?id=");
 		mailContent.append(getId());
 
-		String subject = "Task: " + title;
+		String subject = "Task - " + title;
 		SMTPMail.sendSMTPMail(taskCreator, rcpt, subject, taskCreator, mailContent.toString());
 	}
 

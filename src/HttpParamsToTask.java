@@ -155,20 +155,20 @@ public class HttpParamsToTask {
 		int idInt = Integer.parseInt(params.get(DataXMLManager.ID));
 		dataBase.deleteTaskByID(idInt);
 	}
-	
+
 	public void deletePollInDateBase() {
 		int idInt = Integer.parseInt(params.get(DataXMLManager.ID));
-		//dataBase.deletePoll(pollToDelete)
+		// dataBase.deletePoll(pollToDelete)
 	}
 
 	public boolean isValidNewPoll() {
-		
 
 		try {
 			String subject = params.get(DataXMLManager.SUBJECT);
 			String content = params.get(DataXMLManager.CONTENT);
 			String recipients = params.get(DataXMLManager.RCPT);
-			if (recipients.isEmpty()) return false;
+			if (recipients.isEmpty())
+				return false;
 			String[] allRcpts = recipients.split("\n");
 			for (int i = 0; i < allRcpts.length; i++) {
 				if (!isValidEmail(allRcpts[i])) {
@@ -181,7 +181,7 @@ public class HttpParamsToTask {
 			return false;
 		}
 	}
-	
+
 	public boolean isValidNewTask() {
 		try {
 			String subject = params.get(DataXMLManager.SUBJECT);
@@ -197,7 +197,7 @@ public class HttpParamsToTask {
 	}
 
 	private static boolean isValidEmail(String email) {
-		Matcher m = emailPattern.matcher(email); 
+		Matcher m = emailPattern.matcher(email);
 		return !m.matches();
 	}
 
@@ -223,9 +223,10 @@ public class HttpParamsToTask {
 			return null;
 		}
 
-		return new Task(user, subject, new Date(), parsedDate, Task.In_Progress, content, recipient, false, false, dataBase.getNewID());
+		return new Task(user, subject, new Date(), parsedDate, Task.In_Progress, content, recipient, false, false,
+				dataBase.getNewID());
 	}
-	
+
 	public Poll createNewPoll(String user) {
 		String subject, content, recipients, answers;
 		LinkedList<PollParticipant> rcpts = new LinkedList<PollParticipant>();
@@ -236,33 +237,32 @@ public class HttpParamsToTask {
 			recipients = URLDecoder.decode(params.get(DataXMLManager.RCPT), "UTF-8");
 			String[] allRcpts = recipients.split("\n");
 			for (int i = 0; i < allRcpts.length; i++) {
-				rcpts.add(new PollParticipant(allRcpts[i], false, ""));
+				// rcpts.add(new PollParticipant(allRcpts[i], false));
+				// TODO
 			}
 			answers = URLDecoder.decode(params.get(DataXMLManager.ANSWER), "UTF-8");
 			String[] allAnswers = answers.split("\n");
 			for (int j = 0; j < allAnswers.length; j++) {
 				parsedAnswers.add(allAnswers[j]);
 			}
-			
 
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return null;
 		}
 
-
 		return new Poll(user, new Date(), subject, content, parsedAnswers, rcpts, false, dataBase.getNewID());
-	}	
-	
+	}
+
 	public void createNewTaskInDataBase(String user) {
 		Task newTask = createNewTask(user);
 		newTask.handleNewTask();
 	}
-	
+
 	public void createNewPollInDataBase(String user) {
 		Poll newPoll = createNewPoll(user);
 		dataBase.addPoll(newPoll);
-		//TODO
+		// TODO
 	}
 
 	public boolean isValidTaskReply() {
@@ -274,7 +274,7 @@ public class HttpParamsToTask {
 			return false;
 		}
 	}
-	
+
 	public void closeTask() {
 		int idInt = Integer.parseInt(params.get(DataXMLManager.ID));
 		dataBase.closeTask(idInt);
@@ -284,9 +284,10 @@ public class HttpParamsToTask {
 		int idInt = Integer.parseInt(params.get(DataXMLManager.ID));
 		int rcptIndex = Integer.parseInt(params.get(DataXMLManager.RCPT));
 		int answerIndex = Integer.parseInt(params.get(DataXMLManager.ANSWER));
-		dataBase.participantHadAnswerPoll(idInt, rcptIndex, answerIndex);
+		// dataBase.participantHadAnswerPoll(idInt, rcptIndex, answerIndex);
+		// TODO
 	}
-	
+
 	public boolean isValidPollReply() {
 		try {
 			String id = params.get(DataXMLManager.ID);
