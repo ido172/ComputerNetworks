@@ -35,9 +35,9 @@ public class Task {
 		isCompleted = true;
 		status = Completed;
 		StringBuilder mailContent = new StringBuilder();
-		mailContent.append("The task");
+		mailContent.append("The task: ");
+		mailContent.append(title);
 		mailContent.append(SMTPMail.CRLF);
-		mailContent.append(content);
 		mailContent.append(SMTPMail.CRLF + "Had been completed");
 
 		SMTPMail.sendSMTPMail(rcpt, taskCreator, "Task had been completed", rcpt, mailContent.toString());
@@ -65,7 +65,9 @@ public class Task {
 	public void handleNewTask() {
 
 		StringBuilder mailContent = new StringBuilder();
-		mailContent.append("New task: " + content + SMTPMail.CRLF);
+		mailContent.append("New task: " + SMTPMail.CRLF);
+		mailContent.append(content + SMTPMail.CRLF);
+		mailContent.append(SMTPMail.CRLF);
 		mailContent.append("To mark the task: ");
 		mailContent.append(title);
 		mailContent.append(" as completed press this link http://");

@@ -12,6 +12,7 @@ public class HttpResponseMaker {
 	private DataBase dataBase;
 	private HashMap<String, String> params;
 	private HashMap<String, String> request;
+	private HttpParamsToTask handler;
 
 	public HttpResponseMaker(HttpRequestHandler httpRequest) {
 		this.httpRequest= httpRequest; 
@@ -21,6 +22,7 @@ public class HttpResponseMaker {
 		dataBase = httpRequest.dataBase;
 		params = httpRequest.httpRequestParams;
 		request = httpRequest.parsedHttpRequest;
+		handler = new HttpParamsToTask(dataBase, params);
 	}
 
 	public HttpResponse handleGETRequest() throws IOException {
@@ -32,21 +34,7 @@ public class HttpResponseMaker {
 		String mailInCookie = getMailCookie();
 		String response;
 		String cookie = null;
-		if (location.contains("replay.html")) {
-			HttpParamsToTask handler = new HttpParamsToTask(dataBase, params);
-			if (location.equals("task_reply.html") && handler.isValidTaskReply()) {
-				location = "tasks.html";
-				response = HttpResponse.RESPONSE_302_REDIRECT;
-				handler.closeTask();
-			} else if(location.equals("poll_reply.html") && handler.isValidPollReply()) {
-				location = "polls.html";
-				response = HttpResponse.RESPONSE_302_REDIRECT;
-				handler.setPollAnswer();
-			} else {
-				return makeErrorPageResponse(HttpResponse.RESPONSE_400_BAD_REQUEST, HttpResponse.RESPONSE_400_BAD_REQUEST);
-			}
-		}
-		else if (mailInCookie == null && location.contains(".html")) { // no cookie
+		if (mailInCookie == null && location.contains(".html") && !location.contains("reply.html")) { // no cookie
 			if (location.equals(defaultPage)) {
 				response = HttpResponse.RESPONSE_200_OK;
 			} else {
@@ -71,11 +59,9 @@ public class HttpResponseMaker {
 	public HttpResponse handlePOSTRequest() throws IOException {
 
 		String location = request.get(RequestParser.LOCATION).substring(1);
-
 		String response = HttpResponse.RESPONSE_200_OK;
 		String userName = null;
 		String user = getMailCookie();
-		HttpParamsToTask handler = new HttpParamsToTask(dataBase, params);
 		if (user == null) {
 			if (location.equals("main.html") && params.containsKey("login")) { 
 				response = HttpResponse.RESPONSE_200_OK;
@@ -90,7 +76,7 @@ public class HttpResponseMaker {
 			
 			//Reminders
 		} else if (location.equals("submit_reminder.html")) {
-			if (handler.isDeleteRequest()  && handler.isValidDeleteRequest(user)) {
+			if (handler.isDeleteRequest()  && handler.isValidReminderDeleteRequest(user)) {
 				handler.deleteReminderInDateBase();
 				location = "reminders.html";
 				response = HttpResponse.RESPONSE_302_REDIRECT;
@@ -107,7 +93,7 @@ public class HttpResponseMaker {
 			}
 			
 		} else if (location.equals("submit_task.html")) {
-			if (handler.isDeleteRequest() && handler.isValidDeleteRequest(user)) {
+			if (handler.isDeleteRequest() && handler.isValidTaskDeleteRequest(user)) {
 				handler.deleteTaskInDateBase();
 				location = "tasks.html";
 				response = HttpResponse.RESPONSE_302_REDIRECT;
@@ -119,13 +105,13 @@ public class HttpResponseMaker {
 				response = HttpResponse.RESPONSE_200_OK;	//Error page
 			}
 		} else if (location.equals("submit_poll.html")) {
-			if (handler.isDeleteRequest() && handler.isValidDeleteRequest(user)) {
-				handler.deleteTaskInDateBase();
-				location = "tasks.html";
+			if (handler.isDeleteRequest() && handler.isValidPollDeleteRequest(user)) {
+				handler.deletePollInDateBase();
+				location = "polls.html";
 				response = HttpResponse.RESPONSE_302_REDIRECT;
-			} else if (handler.isValidNewTask()) {
-				handler.createNewTaskInDataBase(user);
-				location = "tasks.html";
+			} else if (handler.isValidNewPoll()) {
+				handler.createNewPollInDataBase(user);
+				location = "polls.html";
 				response = HttpResponse.RESPONSE_302_REDIRECT;
 			} else {
 				response = HttpResponse.RESPONSE_200_OK;
@@ -157,6 +143,22 @@ public class HttpResponseMaker {
 					break;
 				case "polls.html":
 					responseBody = htmlCreator.createPollsPage(getMailCookie(), responseBody, dataBase);
+					break;
+				case "polls_reply.html":
+					if (handler.isValidPollReply()) {
+						responseBody = htmlCreator.createPollReplyPage(responseBody, dataBase, params, true);
+						handler.setPollAnswer();
+					} else {
+						responseBody = htmlCreator.createPollReplyPage(responseBody, dataBase, params, false);
+					}
+					break;
+				case "task_reply.html":
+					if (handler.isValidTaskReply()) {
+						responseBody = htmlCreator.createTaskReplyPage(responseBody, true);
+						handler.closeTask();
+					} else {
+						responseBody = htmlCreator.createTaskReplyPage(responseBody, false);
+					}
 					break;
 			}
 

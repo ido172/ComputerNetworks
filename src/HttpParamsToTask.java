@@ -36,7 +36,7 @@ public class HttpParamsToTask {
 		if (params.containsKey(DataXMLManager.ID)) {
 			int id = Integer.parseInt(params.get(DataXMLManager.ID));
 			Reminder reminder = dataBase.retriveReminderByID(id);
-			if (reminder != null && isValidNewReminder() && reminder.getUser().equals(user)) {
+			if (reminder != null && !reminder.isHadBeenSend() && isValidNewReminder() && reminder.getUser().equals(user)) {
 				result = true;
 			}
 		}
@@ -133,12 +133,38 @@ public class HttpParamsToTask {
 		return params.containsKey("delete");
 	}
 
-	public boolean isValidDeleteRequest(String user) {
+	public boolean isValidReminderDeleteRequest(String user) {
 		boolean result = false;
 		if (params.containsKey(DataXMLManager.ID)) {
 			int id = Integer.parseInt(params.get(DataXMLManager.ID));
 			Reminder reminder = dataBase.retriveReminderByID(id);
 			if (reminder != null && reminder.getUser().equals(user)) {
+				result = true;
+			}
+		}
+
+		return result;
+	}
+	
+	public boolean isValidTaskDeleteRequest(String user) {
+		boolean result = false;
+		if (params.containsKey(DataXMLManager.ID)) {
+			int id = Integer.parseInt(params.get(DataXMLManager.ID));
+			Task task = dataBase.retriveTaskByID(id);
+			if (task != null && task.getTaskCreator().equals(user)) {
+				result = true;
+			}
+		}
+
+		return result;
+	}
+	
+	public boolean isValidPollDeleteRequest(String user) {
+		boolean result = false;
+		if (params.containsKey(DataXMLManager.ID)) {
+			int id = Integer.parseInt(params.get(DataXMLManager.ID));
+			Poll poll = dataBase.retrivePollByID(id);
+			if (poll != null && poll.getPollCreator().equals(user)) {
 				result = true;
 			}
 		}
@@ -155,20 +181,18 @@ public class HttpParamsToTask {
 		int idInt = Integer.parseInt(params.get(DataXMLManager.ID));
 		dataBase.deleteTaskByID(idInt);
 	}
-
+	
 	public void deletePollInDateBase() {
 		int idInt = Integer.parseInt(params.get(DataXMLManager.ID));
-		// dataBase.deletePoll(pollToDelete)
+		dataBase.deletePollByID(idInt);
 	}
 
 	public boolean isValidNewPoll() {
-
 		try {
 			String subject = params.get(DataXMLManager.SUBJECT);
 			String content = params.get(DataXMLManager.CONTENT);
 			String recipients = params.get(DataXMLManager.RCPT);
-			if (recipients.isEmpty())
-				return false;
+			if (recipients.isEmpty()) return false;
 			String[] allRcpts = recipients.split("\n");
 			for (int i = 0; i < allRcpts.length; i++) {
 				if (!isValidEmail(allRcpts[i])) {
@@ -181,7 +205,7 @@ public class HttpParamsToTask {
 			return false;
 		}
 	}
-
+	
 	public boolean isValidNewTask() {
 		try {
 			String subject = params.get(DataXMLManager.SUBJECT);
@@ -197,7 +221,7 @@ public class HttpParamsToTask {
 	}
 
 	private static boolean isValidEmail(String email) {
-		Matcher m = emailPattern.matcher(email);
+		Matcher m = emailPattern.matcher(email); 
 		return !m.matches();
 	}
 
@@ -223,11 +247,10 @@ public class HttpParamsToTask {
 			return null;
 		}
 
-		return new Task(user, subject, new Date(), parsedDate, Task.In_Progress, content, recipient, false, false,
-				dataBase.getNewID());
+		return new Task(user, subject, new Date(), parsedDate, Task.In_Progress, content, recipient, false, false, dataBase.getNewID());
 	}
-
-	public Poll createNewPoll(String user) {
+	
+	private Poll createNewPoll(String user) {
 		String subject, content, recipients, answers;
 		LinkedList<PollParticipant> rcpts = new LinkedList<PollParticipant>();
 		LinkedList<String> parsedAnswers = new LinkedList<String>();
@@ -237,64 +260,65 @@ public class HttpParamsToTask {
 			recipients = URLDecoder.decode(params.get(DataXMLManager.RCPT), "UTF-8");
 			String[] allRcpts = recipients.split("\n");
 			for (int i = 0; i < allRcpts.length; i++) {
-				// rcpts.add(new PollParticipant(allRcpts[i], false));
-				// TODO
+				rcpts.add(new PollParticipant(allRcpts[i], false, ""));
 			}
 			answers = URLDecoder.decode(params.get(DataXMLManager.ANSWER), "UTF-8");
 			String[] allAnswers = answers.split("\n");
 			for (int j = 0; j < allAnswers.length; j++) {
 				parsedAnswers.add(allAnswers[j]);
 			}
+			
 
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return null;
 		}
 
-		return new Poll(user, new Date(), subject, content, parsedAnswers, rcpts, false, dataBase.getNewID());
-	}
 
+		return new Poll(user, new Date(), subject, content, parsedAnswers, rcpts, false, dataBase.getNewID());
+	}	
+	
 	public void createNewTaskInDataBase(String user) {
 		Task newTask = createNewTask(user);
+		dataBase.addTask(newTask);
 		newTask.handleNewTask();
 	}
-
+	
 	public void createNewPollInDataBase(String user) {
 		Poll newPoll = createNewPoll(user);
 		dataBase.addPoll(newPoll);
-		// TODO
+		newPoll.sendMailsToParticipants();
 	}
 
 	public boolean isValidTaskReply() {
 		try {
 			String id = params.get(DataXMLManager.ID);
 			Task task = dataBase.retriveTaskByID(Integer.parseInt(id));
-			return task != null;
+			return (task != null && !task.isTaskExpiredHadBeenNotify() && !task.isCompleted());
 		} catch (Exception e) {
 			return false;
 		}
 	}
-
+	
 	public void closeTask() {
 		int idInt = Integer.parseInt(params.get(DataXMLManager.ID));
 		dataBase.closeTask(idInt);
 	}
 
 	public void setPollAnswer() {
-		int idInt = Integer.parseInt(params.get(DataXMLManager.ID));
-		int rcptIndex = Integer.parseInt(params.get(DataXMLManager.RCPT));
+		int pollID = Integer.parseInt(params.get(DataXMLManager.ID));
+		String participantName = params.get(DataXMLManager.RCPT);
 		int answerIndex = Integer.parseInt(params.get(DataXMLManager.ANSWER));
-		// dataBase.participantHadAnswerPoll(idInt, rcptIndex, answerIndex);
-		// TODO
+		dataBase.participantHadAnswerPoll(pollID, participantName, answerIndex);
 	}
-
+	
 	public boolean isValidPollReply() {
 		try {
-			String id = params.get(DataXMLManager.ID);
-			String answerId = params.get(DataXMLManager.ID);
-			String rcptId = params.get(DataXMLManager.ID);
-			Poll poll = dataBase.retrivePollByID(Integer.parseInt(id));
-			return (!(poll == null && answerId.isEmpty() && rcptId.isEmpty()));
+			int id = Integer.parseInt(params.get(DataXMLManager.ID));
+			int answer = Integer.parseInt(params.get(DataXMLManager.ANSWER));
+			String rcpt = params.get(DataXMLManager.RCPT);
+			Poll poll = dataBase.retrivePollByID(id);
+			return (poll != null && !poll.isCompleted() && !rcpt.isEmpty()  && answer >= 0 && answer < poll.getAnswers().size());
 		} catch (Exception e) {
 			return false;
 		}

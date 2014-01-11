@@ -2,10 +2,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 public class HTMLCreator {
 
+	
+	private static String STATUS_PLACEHOLDER = "[STATUS]";
 	private static String USERNAME_PLACEHOLDER = "[USER_NAME]";
 	private static String DATA_PLACEHOLDER = "[DATA_PLACEHOLDER]";
 	private SimpleDateFormat dateFormat;
@@ -44,8 +47,12 @@ public class HTMLCreator {
 				content.append("<td>" + reminder.getTitle() + "</td>");
 				content.append("<td>" + getDateInRightformat(reminder.getDateOfCreation()) + "</td>");
 				content.append("<td>" + getDateInRightformat(reminder.getDateOfReminding()) + "</td>");
-				content.append("<td><a data-role=button onclick=storeReminderData" + builderReminderIdParams(reminder)
-						+ " href=reminder_editor.html>Edit</a></td>");
+				if (!reminder.isHadBeenSend()) {
+					content.append("<td><a data-role=button onclick=storeReminderData" + builderReminderIdParams(reminder)
+							+ " href=reminder_editor.html>Edit</a></td>");
+				} else {
+					content.append("<td></td>");
+				}
 				content.append("<td><form action='submit_reminder.html' data-ajax='false' method='POST'><input type='submit' value='delete' /><input type='hidden' name='id' value='"
 						+ reminder.getId() + "'/><input type='hidden' name='delete' value='delete'/></form></td>");
 				content.append("</tr>");
@@ -74,7 +81,7 @@ public class HTMLCreator {
 				content.append("<td>" + getDateInRightformat(task.getDueDate()) + "</td>");
 				content.append("<td>" + task.getStatus() + "</td>");
 				if (task.getStatus().equals(Task.In_Progress))
-					content.append("<td><form action='submit_reminder.html' data-ajax='false' method='POST'><input type='submit' value='delete' /><input type='hidden' name='id' value='"
+					content.append("<td><form action='submit_task.html' data-ajax='false' method='POST'><input type='submit' value='delete' /><input type='hidden' name='id' value='"
 							+ task.getId() + "'/><input type='hidden' name='delete' value='delete'/></form></td>");
 				else {
 					content.append("<td></td>");
@@ -100,16 +107,20 @@ public class HTMLCreator {
 			content.append("</tr>");
 			for (Poll poll : polls) {
 				content.append("<tr>");
-				content.append("<td>" + poll.getQuestion() + "</td>");
+				content.append("<td>" + poll.getSubject() + "</td>");
 				content.append("<td>" + getDateInRightformat(poll.getDateOfCreation()) + "</td>");
-				content.append("<td>");
+				content.append("<td style='text-align:left;'>");
 				LinkedList<PollParticipant> allRcpts = poll.getRcpts();
 				for (PollParticipant rcpt : allRcpts) {
-					content.append(rcpt.isHadAnswer());
+					content.append("<b>"+rcpt.getUserName()+"</b>: ");
+					if (rcpt.isHadAnswer())
+						content.append(rcpt.getParticipantReplay());
+					else
+						content.append("had not answered yet");
 					content.append("<br/>");
 				}
 				content.append("</td>");
-				content.append("<td><form action='submit_reminder.html' data-ajax='false' method='POST'><input type='submit' value='delete' /><input type='hidden' name='id' value='"+ poll.getId() + "'/><input type='hidden' name='delete' value='delete'/></form></td>");
+				content.append("<td><form action='submit_poll.html' data-ajax='false' method='POST'><input type='submit' value='delete' /><input type='hidden' name='id' value='"+ poll.getId() + "'/><input type='hidden' name='delete' value='delete'/></form></td>");
 				
 				content.append("</tr>");
 			}
@@ -143,6 +154,35 @@ public class HTMLCreator {
 
 	private String getJustTime(Date date) {
 		return justTimeFormat.format(date);
+	}
+	
+	public String createTaskReplyPage(String htmlTemaplate, boolean isSuccess) {
+		String result;
+		if (isSuccess) {
+			result = htmlTemaplate.replace(STATUS_PLACEHOLDER, "Task completed!");
+			result = result.replace(DATA_PLACEHOLDER, "Task was successfully marked as completed");
+		}
+		else {
+			result = htmlTemaplate.replace(STATUS_PLACEHOLDER, "Error!");
+			result = result.replace(DATA_PLACEHOLDER, "Error while trying to close task, maybe deleted, completed or time over due");
+		}
+		
+		return result;
+	}
+	
+	public String createPollReplyPage(String htmlTemaplate, DataBase dataBase, HashMap<String, String> params, boolean isSuccess) {
+		String result;
+		if (isSuccess) {
+			result = htmlTemaplate.replace(STATUS_PLACEHOLDER, "You have aswered the poll!");
+			String answer = dataBase.retrivePollByID(Integer.parseInt(params.get(DataXMLManager.ID))).getAnswers().get(Integer.parseInt(params.get(DataXMLManager.ANSWER)));
+			result = result.replace(DATA_PLACEHOLDER, "Your answer was" + answer);
+		}
+		else {
+			result = htmlTemaplate.replace(STATUS_PLACEHOLDER, "Error!");
+			result = result.replace(DATA_PLACEHOLDER, "Error while trying to answer poll, maybe deleted or alredy completed");
+		}
+		
+		return result;
 	}
 
 }
